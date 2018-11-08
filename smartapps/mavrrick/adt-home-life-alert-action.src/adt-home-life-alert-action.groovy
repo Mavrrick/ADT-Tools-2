@@ -1,5 +1,5 @@
 /**
- *  ADT Alert Action
+ *  ADT Home/Life Portection Alert
  *
  *  Copyright 2018 CRAIG KING
  *
@@ -14,7 +14,7 @@
  *
  */
 definition(
-    name: "ADT Alert Action",
+    name: "ADT Home-Life Alert Action",
     namespace: "Mavrrick",
     author: "CRAIG KING",
     description: "Smartthing ADT tools for additional functions ",
@@ -27,13 +27,12 @@ definition(
 /* 
 *
 * Initial release v1.0.0
-* Initial release of Combined Alert Action app.. This is intial release of child app
-*
+* 
 */
 import groovy.time.TimeCategory
 
 preferences {
-	page (name: "mainPage", title: "ADT Alert App ")
+	page (name: "mainPage", title: "Home/Life alert Action")
 	page (name: "adtTrigger", title: "Alert Trigger Devices")
 	page (name: "adtActions", title: "Alert Actions triggered by event")
     page (name: "adtLightsOpt", title: "Optional Light Flash Setup")
@@ -59,11 +58,11 @@ def subscribeToEvents() {
     else {
     	subscribe(location, "securitySystemStatus", alarmHandler)
         }
-	if (contact) {
-		subscribe(contact, "contact.open", triggerHandler)
+	if (water) {
+		subscribe(contact, "water.wet", triggerHandler)
 	}
-	if (motion) {
-		subscribe(motion, "motion.active", triggerHandler)
+	if (smoke) {
+		subscribe(motion, "smoke.detected", triggerHandler)
 	}
 }
 
@@ -71,8 +70,8 @@ def mainPage()
 {
 	dynamicPage(name: "mainPage", title: "ADT Alert Action", uninstall: true, install: true)
 	{
-    	section(title: "Security Alert Action Name") {
-        	label title: "Please name this security alert action", required: true, defaultValue: "Security alert action"
+    	section(title: "Home/Life Alert Action Name") {
+        	label title: "Please name this home/life alert action", required: true, defaultValue: "Home/Life alert action"
         }
 		section("Alert Action Trigger type")
 		{
@@ -88,7 +87,7 @@ def mainPage()
 		}
 		section("Messeging options")
 		{
-			href "notificationSetup", title: "Notification setup", description: "Notification values for smartapp"
+			href "notificationSetup", title: "Notification setup", description: "Notification values for smartapp" 
 		}
 	}
 }
@@ -101,13 +100,13 @@ def adtTrigger()
 		{
 			if (settings.alertTrgType) {
             paragraph "This event is being configured as a ADT Sensor event and should only use ADT sensors. Please select the correct sensors from the types below"       	
-            input "adtcontact", "capability.contactSensor", title: "Look for ADT Activity on these contact sesors", required: false, multiple: true
-            input "adtmotion", "capability.motionSensor", title: "Look for ADT Activity on these motion sesors", required: false, multiple: true
+            input "adtsmoke", "capability.smokedetctor", title: "Look for ADT Activity on these Smoke detectors", required: false, multiple: true
+            input "adtwater", "capability.waterSensor", title: "Look for ADT Activity on these water sesors", required: false, multiple: true
             }
             else {
             paragraph "This event is being configured as a generic sensor event and can use any sensor. This should not be used if you want to use ADT Monitoring or only use ADT sensors. Please select the correct sensors from the types below" 
-            input "contact", "capability.contactSensor", title: "Use these sensors for Unmonitored security alerts", required: false, multiple: true
-            input "motion", "capability.motionSensor", title: "Look for ADT Activity on these motion sesors", required: false, multiple: true
+            input "smoke", "capability.smokedetctor", title: "Use these sensors for Unmonitored smoke alarms", required: false, multiple: true
+            input "water", "capability.waterSensor", title: "Look for water leak activity on these water sensors", required: false, multiple: true
             }
 		}
         section ("Return to ADT Tools Main page"){
@@ -136,7 +135,7 @@ def adtActions()
             href "adtLightsOpt", title: "Change Light default values", description: "Change default values for flashing lights"            
 		}
         section ("Return to ADT Tools Main page"){
-            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup"            
+            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup"           
 		}
 	}
 }
@@ -174,7 +173,7 @@ def adtCameraSetup()
 
 def notificationSetup()
 {
-	dynamicPage(name: "notificationSetup", title: "Notification setup", nextPage: "mainPage")
+	dynamicPage(name: "notificationSetup", title: "Notification setup", uninstall: true, install: true)
 	{
         section("Via a push notification and/or an SMS message"){
         input "message", "text", title: "Send this message if activity is detected", required: false
@@ -413,30 +412,30 @@ switch (evt.value)
 	log.debug "Notify got alarm event ${evt}"
     log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
         log.debug "The event id to be compared is ${evt.value}"     
-		if (adtcontact && adtmotion) {
-        log.debug "The event id to be compared is ${settings.adtcontact} and ${adtmotion}"
-		def devices = settings.adtcontact + settings.adtmotion
+		if (adtsmoke && adtwater) {
+        log.debug "The event id to be compared is ${settings.adtsmoke} and ${adtwater}"
+		def devices = settings.adtsmoke + settings.adtwater
         log.debug "These devices were found ${devices.id} are being reviewed."
     	devices.findAll { it.id == evt.value } .each { 
-        log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, Security event found" 
+        log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, Home/ Life saftey event found" 
         adtActionHandler()
         	}
         	}
-        else if (adtcontact) {
-        log.debug "The event id to be compared is ${settings.adtcontact}"
-        def devices = settings.adtcontact
+        else if (adtsmoke) {
+        log.debug "The event id to be compared is ${settings.adtsmoke}"
+        def devices = settings.adtsmoke
         log.debug "These devices were found ${devices.id} are being reviewed."
     	devices.findAll { it.id == evt.value } .each { 
-        log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, Security event found"
+        log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, Smoke event found"
         adtActionHandler()
         	}
         	}
-        else if (adtmotion) {
-        log.debug "The event id to be compared is ${adtmotion}"
-        def devices = settings.adtmotion
+        else if (adtwater) {
+        log.debug "The event id to be compared is ${adtwater}"
+        def devices = settings.adtwater
         log.debug "These devices were found ${devices.id} are being reviewed."
     	devices.findAll { it.id == evt.value } .each { 
-        log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, Security event found"
+        log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, water event found"
         adtActionHandler()
         	}
             }

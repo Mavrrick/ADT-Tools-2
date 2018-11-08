@@ -77,13 +77,13 @@ def mainPage()
 	{
 		section("ADT Integration Smartapps")
 		{
-			href "adtNotifier", title: "Custom Notifications", description: "Setup Custon notifications for alarm state change."
+			href "adtNotifier", title: "Alarm Mode Change Notifications", description: "Setup Custom notifications for alarm state change."
             href "adtModeChange", title: "ADT Smartthings Alarm Mode change integration", description: "Enables various functions around Mode change integration."
 		}
 
 		section("Alert Apps")
 		{
-			href "adtAlertActions", title: "Alarm Alert Actions", description: "Setup Alarm alert actions. "
+			href "adtAlertActions", title: "Integration Alert Actions", description: "Setup Integration alert actions."
 		}
 		section("ADT Tools basic setup")
 		{
@@ -146,7 +146,8 @@ def adtAlertActions()
 	dynamicPage(name: "adtAlertActions", title: "ADT Alert Actions ", uninstall: false, install: false)
     {
         section ("Alarm Event Action Apps"){
-            app(name: "adtAlertAction", appName: "ADT Alert Action", namespace: "Mavrrick", title: "Setup Alert Action apps", multiple: true)            
+            app(name: "adtAlertAction", appName: "ADT Alert Action", namespace: "Mavrrick", title: "Security Alert Action apps", multiple: true)
+            app(name: "adtHomeAction", appName: "ADT Home-Life Alert Action", namespace: "Mavrrick", title: "Home/Life Alert Action apps", multiple: true)
 		}
         section ("Return to ADT Tools Main page"){
             href "mainPage", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
