@@ -35,6 +35,7 @@ preferences
 	page (name: "adtNotifier", title: "ADT Custom Notification")
 	page (name: "adtModeChange", title: "Setup mode change settings")
 	page (name: "adtAlertActions", title: "Work with ADT alarm alert actions")
+   	page (name: "optionalSettings", title: "Optional Setup")
 }
 
 
@@ -87,7 +88,7 @@ def mainPage()
 		}
 		section("ADT Tools basic setup")
 		{
-			href "generalSettings", title: "Enable advanced logging", description: "Setup ADT Automation standard buttons."
+			href "optionalSettings", title: "Optional setup steps", description: "Setup ADT Automation standard buttons."
 			href "about", title: "About ADT Tools ", description: "Support the project...  Consider making a small contribution today!"
 		}
 	}
@@ -153,6 +154,19 @@ def adtAlertActions()
             href "mainPage", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
 		}
     }
+}
+
+def optionalSettings()
+{
+	dynamicPage(name: "optionalSettings", title: "Optional settings", uninstall: false, install: false)
+	{
+        section ("Virtual Button Setup"){
+	   		input "createVirtButton", "bool", title: "Would you like ADT Tools to create your virtual buttons for Mode change functianlity", description: "ADT Tools will attempt to create virtual devices for the mode change functinality", defaultValue: false, required: true, multiple: false
+		}
+        section ("Return to ADT Tools Main page"){
+            href "mainPage", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
+		}
+	}
 }
 
 def installed() {

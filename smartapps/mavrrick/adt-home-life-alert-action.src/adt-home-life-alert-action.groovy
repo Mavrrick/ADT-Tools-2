@@ -59,10 +59,10 @@ def subscribeToEvents() {
     	subscribe(location, "securitySystemStatus", alarmHandler)
         }
 	if (water) {
-		subscribe(contact, "water.wet", triggerHandler)
+		subscribe(contact, "water.wet", alarmAction)
 	}
 	if (smoke) {
-		subscribe(motion, "smoke.detected", triggerHandler)
+		subscribe(motion, "smoke.detected", alarmAction)
 	}
 }
 
@@ -82,7 +82,7 @@ def mainPage()
 
 		section("Alert Action after alarm is triggered")
 		{
-			href "adtActions", title: "Alarm Event Actions", description: "Actions that will trigger from alarm event. "
+			href "adtActions", title: "Alarm Event Actions", description: "Actions that will trigger from Home/Life Alert event. "
            	href "adtCameraSetup", title: "Camera setup for Alert Action", description: "Camera setup for Alert Action"
 		}
 		section("Messeging options")
