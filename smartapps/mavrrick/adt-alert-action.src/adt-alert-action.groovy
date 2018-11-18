@@ -108,7 +108,7 @@ def adtTrigger()
             paragraph "This event is being configured as a generic sensor event and can use any sensor. This should not be used if you want to use ADT Monitoring or only use ADT sensors. Please select the correct sensors from the types below" 
             input "contact", "capability.contactSensor", title: "Use these sensors for Unmonitored security alerts", required: false, multiple: true
             input "motion", "capability.motionSensor", title: "Look for ADT Activity on these motion sesors", required: false, multiple: true
-			input "panel", "capability.battery", title: "Select ADT Panel for Alarm Status", required: true
+			input "panel", "capability.securitySystem", title: "Select ADT Panel for Alarm Status", required: true
             }
 		}
         section ("Return to ADT Tools Main page"){

@@ -65,7 +65,26 @@ def initialize() {
     childApps.each {child ->
         log.debug "child app: ${child.label}"
     }
-}
+    if (settings.createVirtButton)
+    				log.debug "initialize: Creating virtual button devices ADT Mode Change"
+				addChildDevice("Mavrrick", "ADT Tools Button", "ADT Tools Disarmed", location.hubs[0].id, [
+					"name": "ADT Tools Disarmed",
+					"label": "ADT Tools Disarmed",
+					"completedSetup": true, 					
+				])
+                				addChildDevice("Mavrrick", "ADT Tools Button", "ADT Tools Armed Stay", location.hubs[0].id, [
+					"name": "ADT Tools Armed Stay",
+					"label": "ADT Tools Armed Stay",
+					"completedSetup": true, 					
+				])
+                				addChildDevice("Mavrrick", "ADT Tools Button", "ADT Tools Armed Away", location.hubs[0].id, [
+					"name": "ADT Tools Armed Away",
+					"label": "ADT Tools Armed Away",
+					"completedSetup": true, 					
+				])
+                log.debug "ADT Tools Alarm Buttons created"
+	}
+
 
 /*
 	mainPage
@@ -134,7 +153,7 @@ def adtModeChange()
 	}
     
 	section("Select your ADT Smart Panel..."){
-		input "panel", "capability.battery", title: "ADT Panel?", required: true
+		input "panel", "capability.securitySystem", title: "Select ADT Panel for Alarm Status", required: true
 	}
     section ("Return to ADT Tools Main page"){
             href "mainPage", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
@@ -172,12 +191,14 @@ def optionalSettings()
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 	subscribeToEvents()
+    initialize()
 }
 
 def updated() {
 	log.debug "Updated with settings: ${settings}"
 	unsubscribe()
 	subscribeToEvents()
+    initialize()
 }
 
 def subscribeToEvents() {
