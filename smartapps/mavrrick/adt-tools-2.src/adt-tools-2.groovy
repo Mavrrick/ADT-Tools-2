@@ -38,26 +38,6 @@ preferences
    	page (name: "optionalSettings", title: "Optional Setup")
 }
 
-
-
-/* preferences {
-    // The parent app preferences are pretty simple: just use the app input for the child app.
-    page(name: "mainPage", title: "Tools", install: true, uninstall: true,submitOnChange: true) {
-        section ("ADT Integration Apps"){
-            app(name: "adtNotifier", appName: "ADT Notifier", namespace: "Mavrrick", title: "Create custom notification when alarm changes state", multiple: true)
-            app(name: "adtModeChange", appName: "ADT Mode Change", namespace: "Mavrrick", title: "Allows changing alarm mode from smartapps", multiple: true)            
-            }
-        section ("Alarm Event Action Apps"){
-            app(name: "adtContactAlarm", appName: "ADT Door or Window Alert", namespace: "Mavrrick", title: "Create new Door or Window triggered event action", multiple: true)
-            app(name: "adtMotionAlarm", appName: "ADT Motion Alert", namespace: "Mavrrick", title: "Create new Motion triggered event action", multiple: true)
-            app(name: "adtSmokeAlarm", appName: "ADT Smoke Alert", namespace: "Mavrrick", title: "Create new Smoke triggered event action", multiple: true)
-            app(name: "adtWaterAlarm", appName: "ADT Water Alert", namespace: "Mavrrick", title: "Create new Water Leak triggered event action", multiple: true)
-            app(name: "adtAnySensor", appName: "ADT Alert Any Sensor", namespace: "Mavrrick", title: "Allows Unmonitored Alarm action based on ADT status", multiple: true)            
-		}
-    }
-}
-*/
-
 def initialize() {
     // nothing needed here, since the child apps will handle preferences/subscriptions
     // this just logs some messages for demo/information purposes
@@ -207,13 +187,6 @@ def uninstalled() {
     	// 1.4 Remove dead virtual devices
 	getChildDevices()?.each
 	{childDevice ->
-//		if (settings.virtualCameraTiles.find{"ArloPilot_${it}" == childDevice.deviceNetworkId})
-//		{
-//			logTrace "initialize: Found active device: ${childDevice.label}."
-//		}
-//		else
-//		{
-//			logTrace "initialize: Removing unused device: ${childDevice.label}."
 			deleteChildDevice(childDevice.deviceNetworkId)
 		}
 	}
