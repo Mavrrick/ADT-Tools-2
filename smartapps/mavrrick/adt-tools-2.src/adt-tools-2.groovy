@@ -65,7 +65,7 @@ def initialize() {
     childApps.each {child ->
         log.debug "child app: ${child.label}"
     }
-    if (settings.createVirtButton)
+    if (settings.createVirtButton) {
     				log.debug "initialize: Creating virtual button devices ADT Mode Change"
 				addChildDevice("Mavrrick", "ADT Tools Button", "ADT Tools Disarmed", location.hubs[0].id, [
 					"name": "ADT Tools Disarmed",
@@ -83,6 +83,7 @@ def initialize() {
 					"completedSetup": true, 					
 				])
                 log.debug "ADT Tools Alarm Buttons created"
+                }
 	}
 
 
@@ -200,6 +201,22 @@ def updated() {
 	subscribeToEvents()
     initialize()
 }
+
+def uninstalled() {
+    // external cleanup. No need to unsubscribe or remove scheduled jobs
+    	// 1.4 Remove dead virtual devices
+	getChildDevices()?.each
+	{childDevice ->
+//		if (settings.virtualCameraTiles.find{"ArloPilot_${it}" == childDevice.deviceNetworkId})
+//		{
+//			logTrace "initialize: Found active device: ${childDevice.label}."
+//		}
+//		else
+//		{
+//			logTrace "initialize: Removing unused device: ${childDevice.label}."
+			deleteChildDevice(childDevice.deviceNetworkId)
+		}
+	}
 
 def subscribeToEvents() {
     subscribe(myDisarmButton, "momentary.pushed", disarmHandler)
