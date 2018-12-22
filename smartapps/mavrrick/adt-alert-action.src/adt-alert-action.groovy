@@ -29,6 +29,9 @@ definition(
 * Initial release v1.0.0
 * Initial release of Combined Alert Action app.. This is intial release of child app
 *
+* v.1.0.0a
+* Added missed value for unmonitored sensor functionality.
+*
 */
 import groovy.time.TimeCategory
 
@@ -106,6 +109,8 @@ def adtTrigger()
             }
             else {
             paragraph "This event is being configured as a generic sensor event and can use any sensor. This should not be used if you want to use ADT Monitoring or only use ADT sensors. Please select the correct sensors from the types below" 
+       		paragraph "What Active alarm mode do you want to monitor for 1= Arm/Stay, 2=Armed/Away. All other numberical valudes wil be ignored"
+        	input "alarmtype2", "number", title: "What type of alarm do you want to trigger", required: false, defaultValue: 1        
             input "contact", "capability.contactSensor", title: "Use these sensors for Unmonitored security alerts", required: false, multiple: true
             input "motion", "capability.motionSensor", title: "Look for ADT Activity on these motion sesors", required: false, multiple: true
 			input "panel", "capability.securitySystem", title: "Select ADT Panel for Alarm Status", required: true
