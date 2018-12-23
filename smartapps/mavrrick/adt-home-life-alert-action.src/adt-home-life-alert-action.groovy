@@ -490,7 +490,8 @@ def adtActionHandler() {
 					log.debug "Ignoring unexpected Light Action type."
         			log.debug "Light Action ${lightaction.value} detected"
                     break
-			} 		
+			}
+        sendnotification()
 		if (settings.recordCameras)
 			{
 		cameraRecord()
