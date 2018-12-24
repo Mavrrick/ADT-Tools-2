@@ -31,6 +31,9 @@ definition(
 * 12/17/2018 1.0.0.a
 * Corrected typo for use of smoke detectors
 *
+* 12/23/2018 1.0.0.b
+* Corrected issue preventing non adt alerts from working.
+*
 */
 import groovy.time.TimeCategory
 
@@ -62,10 +65,10 @@ def subscribeToEvents() {
     	subscribe(location, "securitySystemStatus", alarmHandler)
         }
 	if (water) {
-		subscribe(contact, "water.wet", alarmAction)
+		subscribe(water, "water.wet", alarmAction)
 	}
 	if (smoke) {
-		subscribe(motion, "smoke.detected", alarmAction)
+		subscribe(smoke, "smoke.detected", alarmAction)
 	}
 }
 
@@ -217,7 +220,7 @@ def triggerHandler(evt) {
         log.debug "Current alarm mode: ${alarmState}. Ignoring event"
     }
     
-def alarmAction()    
+def alarmAction(evt)    
 	{
         switch (alarmtype.value)
         	{
