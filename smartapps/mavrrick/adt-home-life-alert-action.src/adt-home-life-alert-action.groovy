@@ -33,6 +33,10 @@ definition(
 *
 * 12/23/2018 1.0.0.b
 * Corrected issue preventing non adt alerts from working.
+
+* 12/26/2018 v1.0.0.c
+* Added light additional control for dimmer switches involved with Light on actions 2 and 4
+* Corrected Light Action issue if Setlevel to 100% used when no dimmer switch avaliable.
 *
 */
 import groovy.time.TimeCategory
@@ -150,7 +154,10 @@ def adtLightsOpt()
 {
 	dynamicPage(name: "adtLightsOpt", title: "Optional Light Setup", nextPage: "adtCameraSetup")
 	{
-		section(){
+    		section("Light Activation options"){
+      	input "switches3", "capability.switchLevel", title: "Adjust these lights to 100% when turned on as part of light action", multiple: true, required: false
+  		}
+		section("Flashing Option"){
 		input "onFor", "number", title: "On for (default 5000)", required: false
 		input "offFor", "number", title: "Off for (default 5000)", required: false
         input "numFlashes", "number", title: "This number of times (default 3)", required: false
@@ -249,7 +256,9 @@ def alarmAction(evt)
                 case 2 :
                 	log.debug "Light action ${lightaction.value} detected. Turning on selected lights"
                     switches2?.on()
-                    switches2?.setLevel(100)
+                    if (switches3) {
+                    switches3?.setLevel(100)
+                    }
                     break
                 case 3 :
                 	log.debug "Light Action ${lightaction.value} detected. Flashing Selected lights"                    
@@ -258,7 +267,9 @@ def alarmAction(evt)
                 case 4 :
                 	log.debug "Light Action ${lightaction.value} detected. Flash and turning on selected lights"
                     switches2?.on()
-                    switches2?.setLevel(100)
+                    if (switches3) {
+                    switches3?.setLevel(100)
+                    }
                     flashLights()
                     break
                 default:
@@ -477,7 +488,9 @@ def adtActionHandler() {
                 case 2 :
                 	log.debug "Light action ${lightaction.value} detected. Turning on selected lights"
                     switches2?.on()
-                    switches2?.setLevel(100)
+                    if (switches3) {
+                    switches3?.setLevel(100)
+                    }
                     break
                 case 3 :
                 	log.debug "Light Action ${lightaction.value} detected. Flashing Selected lights"                    
@@ -486,7 +499,9 @@ def adtActionHandler() {
                 case 4 :
                 	log.debug "Light Action ${lightaction.value} detected. Flash and turning on selected lights"
                     switches2?.on()
-                    switches2?.setLevel(100)
+                    if (switches3) {
+                    switches3?.setLevel(100)
+                    }
                     flashLights()
                     break
                 default:

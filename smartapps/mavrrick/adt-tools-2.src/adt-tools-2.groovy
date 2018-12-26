@@ -27,6 +27,8 @@ definition(
 /* 
 * Initial release v2.0.0
 *
+* 12/25/2018 v2.0.0.a
+* Update routine to disarm Location alarm state to unschedule other location alarm events if needed.
 */
 
 preferences
@@ -251,6 +253,7 @@ def alarmModeHandler(evt) {
                     break
                 case "disarmed" :
                     sendLocationEvent(name: "alarmSystemStatus", value: "off")
+					unschedule()
                     break
                 default:
 					log.debug "Ignoring unexpected alarmtype mode."
