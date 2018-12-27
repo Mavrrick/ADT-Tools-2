@@ -38,6 +38,7 @@ preferences
 	page (name: "adtModeChange", title: "Setup mode change settings")
 	page (name: "adtAlertActions", title: "Work with ADT alarm alert actions")
    	page (name: "optionalSettings", title: "Optional Setup")
+    page (name: "about", title: "About ADT Tools")
 }
 
 def initialize() {
@@ -164,6 +165,30 @@ def optionalSettings()
 	{
         section ("Virtual Button Setup"){
 	   		input "createVirtButton", "bool", title: "Would you like ADT Tools to create your virtual buttons for Mode change functianlity", description: "ADT Tools will attempt to create virtual devices for the mode change functinality", defaultValue: false, required: true, multiple: false
+		}
+        section ("Return to ADT Tools Main page"){
+            href "mainPage", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
+		}
+	}
+}
+
+def about()
+{
+	dynamicPage(name: "about", title: "About ADT Tools", uninstall: false, install: false)
+	{
+		section()
+		{
+			paragraph image: "https://lh4.googleusercontent.com/-1dmLp--W0OE/AAAAAAAAAAI/AAAAAAAAEYU/BRuIXPPiOmI/s0-c-k-no-ns/photo.jpg", "ADT Tools 2"
+		}
+        section("Support locations")
+		{
+			href "thingsAreSmart", style:"embedded", title: "Things That Are Smart Support Page", url: "http://thingsthataresmart.wiki/index.php?title=ADT_tools_2"
+			href "smtReleaseThd", style:"embedded", title: "Smartthings Community Support Thread", url: "https://community.smartthings.com/t/released-adt-tools-2-for-smartthings-adt-alarm-sytsems/124951"
+		}
+        section("Support the Project")
+		{
+			paragraph "ADT Tools is provided free for personal and non-commercial use.  I have worked on this app in my free time to fill the needs I have found for myself and others like you.  I will continue to make improvements where I can. If you would like you can donate to continue to help with development please use the link below."
+			href "donate", style:"embedded", title: "Consider making a \$5 or \$10 donation today.", image: "https://storage.googleapis.com/arlopilot/donate-icon.png", url: "https://www.paypal.me/mavrrick58"
 		}
         section ("Return to ADT Tools Main page"){
             href "mainPage", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
