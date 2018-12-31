@@ -36,6 +36,10 @@ definition(
 * Added light additional control for dimmer switches involved with Light on actions 2 and 4
 * Corrected Light Action issue if Setlevel to 100% used when no dimmer switch avaliable. 
 *
+* v1.0.0.c 12-31-2018
+* Updated Continous flash rotine to be functional enable breaking of flashing routine.
+* Updated some text to correct spelling
+*
 */
 import groovy.time.TimeCategory
 
@@ -116,7 +120,7 @@ def adtTrigger()
        		paragraph "What Active alarm mode do you want to monitor for 1= Arm/Stay, 2=Armed/Away. All other numberical valudes wil be ignored"
         	input "alarmtype2", "number", title: "What type of alarm do you want to trigger", required: false, defaultValue: 1        
             input "contact", "capability.contactSensor", title: "Use these sensors for Unmonitored security alerts", required: false, multiple: true
-            input "motion", "capability.motionSensor", title: "Look for ADT Activity on these motion sesors", required: false, multiple: true
+            input "motion", "capability.motionSensor", title: "Look for activity on these motion sesors", required: false, multiple: true
 			input "panel", "capability.securitySystem", title: "Select ADT Panel for Alarm Status", required: true
             }
 		}
@@ -157,7 +161,8 @@ def adtLightsOpt()
 	{
     	section("Light Activation options"){
       	input "switches3", "capability.switchLevel", title: "Adjust these lights to 100% when turned on as part of light action", multiple: true, required: false
-  		}		
+		input "lightRepeat", "bool", title: "Enable lights to continue flashing as long as arlarm is occuring?", description: "This switch will enable lights to continue to flash long as there is a active alarm.", defaultValue: false, required: true, multiple: false
+		}		
         section("Flashing Options"){
 		input "onFor", "number", title: "On for (default 5000)", required: false
 		input "offFor", "number", title: "Off for (default 5000)", required: false
@@ -175,7 +180,7 @@ def adtCameraSetup()
 	{
     	section("Camera setup (Optional)"){
         	input "recordCameras", "bool", title: "Enable Camera recording?", description: "This switch will enable cameras to record on alarm events.", defaultValue: false, required: true, multiple: false
-			input "recordRepeat", "bool", title: "Enable Camare to trigger recording as long as arlarm is occuring?", description: "This switch will enable cameras generate new clips as long as thre is a active alarm.", defaultValue: false, required: true, multiple: false
+			input "recordRepeat", "bool", title: "Enable Camare to trigger recording as long as arlarm is occuring?", description: "This switch will enable cameras generate new clips as long as there is a active alarm.", defaultValue: false, required: true, multiple: false
 			input "cameras", "capability.videoCapture", multiple: true, required: false
         	input name: "clipLength", type: "number", title: "Clip Length", description: "Please enter the length of each recording", required: true, range: "5..120", defaultValue: 120
         }
@@ -287,13 +292,18 @@ def alarmAction()
 
 
 def continueFlashing()
-{
-	unschedule()
-	if (state.alarmActive) {
-		flashLights(10)
-		schedule(util.cronExpression(now() + 10000), "continueFlashing")
-	}
-}
+        {
+		def alarmActive = panel.currentSecuritySystemStatus
+    	log.debug "Current alarms is in ${alarmActive} state"
+		if (alarmActive != "disarmed") 
+        	{
+        	log.debug "Alarm Event is still occuring. Submitting flashing for another cycle"
+        flashLights()   
+        	}
+		else {
+        log.debug "Alarm has cleared and is flashing should be stopped."
+		}
+        }
 
 private flashLights() {
 	def doFlash = true
@@ -304,7 +314,7 @@ private flashLights() {
 	log.debug "LAST ACTIVATED IS: ${state.lastActivated}"
 	if (state.lastActivated) {
 		def elapsed = now() - state.lastActivated
-		def sequenceTime = (numFlashes + 1) * (onFor + offFor)
+		def sequenceTime = ((numFlashes) * (onFor + offFor)-500)
 		doFlash = elapsed > sequenceTime
 		log.debug "DO FLASH: $doFlash, ELAPSED: $elapsed, LAST ACTIVATED: ${state.lastActivated}"
 	}
@@ -337,6 +347,12 @@ private flashLights() {
 			}
 			delay += offFor
 		}
+	}
+        	if (settings.lightRepeat)
+	{
+    	def lightCycleTime = ((numFlashes * (onFor + offFor)/1000))
+        log.trace "Checking Alarm Status after $lightCycleTime sec"
+		runIn(lightCycleTime , continueFlashing)
 	}
 }
 
