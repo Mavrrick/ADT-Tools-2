@@ -40,6 +40,10 @@ definition(
 * Updated Continous flash rotine to be functional enable breaking of flashing routine.
 * Updated some text to correct spelling
 *
+* v1.0.1 1/16/19
+* Added ability to have repeat notifications from event until it is cleared on the alarm
+* Updated some text
+*
 */
 import groovy.time.TimeCategory
 
@@ -83,12 +87,12 @@ def mainPage()
 	dynamicPage(name: "mainPage", title: "ADT Alert Action", uninstall: true, install: true)
 	{
     	section(title: "Security Alert Action Name") {
-        	label title: "Please name this security alert action", required: true, defaultValue: "Security alert action"
+        	label title: "Please name this security alert action.", required: true, defaultValue: "Security alert action"
         }
 		section("Alert Action Trigger type")
 		{
         	paragraph "Change the value below value only if you want to use non dual branded sensors and use your this alert action in a unmonitored condition."       	
-			input "alertTrgType", "bool", title: "Are all sensors in this alert action ADT/Smarthings dual branded", description: "Determines if using ADT dual branded sensors or generic sensors.", defaultValue: true, required: true, multiple: false
+			input "alertTrgType", "bool", title: "Are all sensors in this alert action ADT/Smarthings dual branded?", description: "Determines if using ADT dual branded sensors or generic sensors.", defaultValue: true, required: true, multiple: false
 			href "adtTrigger", title: "Select triggers", description: "Select alert trigger devices"
 		}
 
@@ -112,20 +116,20 @@ def adtTrigger()
 		{
 			if (settings.alertTrgType) {
             paragraph "This event is being configured as a ADT Sensor event and should only use ADT sensors. Please select the correct sensors from the types below"       	
-            input "adtcontact", "capability.contactSensor", title: "Look for ADT Activity on these contact sesors", required: false, multiple: true
-            input "adtmotion", "capability.motionSensor", title: "Look for ADT Activity on these motion sesors", required: false, multiple: true
+            input "adtcontact", "capability.contactSensor", title: "Look for ADT Activity on these contact sesors.", required: false, multiple: true
+            input "adtmotion", "capability.motionSensor", title: "Look for ADT Activity on these motion sesors.", required: false, multiple: true
             }
             else {
-            paragraph "This event is being configured as a generic sensor event and can use any sensor. This should not be used if you want to use ADT Monitoring or only use ADT sensors. Please select the correct sensors from the types below" 
-       		paragraph "What Active alarm mode do you want to monitor for 1= Arm/Stay, 2=Armed/Away. All other numberical valudes wil be ignored"
-        	input "alarmtype2", "number", title: "What type of alarm do you want to trigger", required: false, defaultValue: 1        
-            input "contact", "capability.contactSensor", title: "Use these sensors for Unmonitored security alerts", required: false, multiple: true
-            input "motion", "capability.motionSensor", title: "Look for activity on these motion sesors", required: false, multiple: true
-			input "panel", "capability.securitySystem", title: "Select ADT Panel for Alarm Status", required: true
+            paragraph "This event is being configured as a generic sensor event and can use any sensor. This should not be used if you want to use ADT Monitoring or only use ADT sensors. Please select the correct sensors from the types below." 
+       		paragraph "What Active alarm mode do you want to monitor for 1= Arm/Stay, 2=Armed/Away. All other numberical valudes wil be ignored."
+        	input "alarmtype2", "number", title: "What type of alarm do you want to trigger from?", required: false, defaultValue: 1        
+            input "contact", "capability.contactSensor", title: "Use these sensors for Unmonitored security alerts.", required: false, multiple: true
+            input "motion", "capability.motionSensor", title: "Look for activity on these motion sesors.", required: false, multiple: true
+			input "panel", "capability.securitySystem", title: "Select ADT Panel for Alarm Status.", required: true
             }
 		}
         section ("Return to ADT Tools Main page"){
-            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup"            
+            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup."            
 		}
 	}
 }
@@ -136,21 +140,21 @@ def adtActions()
 	{
 		section()
 		{
-        	input "alarms", "capability.alarm", title: "Which Alarm(s) to trigger when ADT alarm goes off", multiple: true, required: false
-        	paragraph "Valid alarm types are 1= Siren, 2=Strobe, and 3=Both. All other numberical valudes wil be ignored"
+        	input "alarms", "capability.alarm", title: "Which Alarm(s) to trigger when ADT alarm goes off?", multiple: true, required: false
+        	paragraph "Valid alarm types are 1= Siren, 2=Strobe, and 3=Both. All other numberical valudes wil be ignored."
         	input "alarmtype", "number", title: "What type of alarm do you want to trigger", required: false, range: "1..3", defaultValue: 3
-        	paragraph "Valid Light actions are are 1 = None, 2 = Turn on lights, 3 = Flash Lights and 4 = Both. All other numberical valudes wil be ignored"
-        	input "lightaction", "number", title: "What type of light action do you want to trigger", required: true, range: "1..4", defaultValue: 1
-        	paragraph "If you choose Light action 4 do not select the same lights in both values"
+        	paragraph "Valid Light actions are are 1 = None, 2 = Turn on lights, 3 = Flash Lights and 4 = Both. All other numberical valudes wil be ignored."
+        	input "lightaction", "number", title: "What type of light action do you want to trigger?", required: true, range: "1..4", defaultValue: 1
+        	paragraph "If you choose Light action 4 do not select the same lights in both values."
         	input "switches2", "capability.switch", title: "Turn these lights on if Light action is set to 2 or 4", multiple: true, required: false
         	input "switches", "capability.switch", title: "Flash these lights (optional) If Light action is set to 3 or 4", multiple: true, required: false
             
 		}
         section ("Optional Light Configuration"){
-            href "adtLightsOpt", title: "Change Light default values", description: "Change default values for flashing lights"            
+            href "adtLightsOpt", title: "Change Light default values", description: "Change default values for flashing lights."            
 		}
         section ("Return to ADT Tools Main page"){
-            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup"            
+            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup."            
 		}
 	}
 }
@@ -160,8 +164,8 @@ def adtLightsOpt()
 	dynamicPage(name: "adtLightsOpt", title: "Optional Light Setup", nextPage: "adtCameraSetup")
 	{
     	section("Light Activation options"){
-      	input "switches3", "capability.switchLevel", title: "Adjust these lights to 100% when turned on as part of light action", multiple: true, required: false
-		input "lightRepeat", "bool", title: "Enable lights to continue flashing as long as arlarm is occuring?", description: "This switch will enable lights to continue to flash long as there is a active alarm.", defaultValue: false, required: true, multiple: false
+      	input "switches3", "capability.switchLevel", title: "Adjust these lights to 100% when turned on as part of light action.", multiple: true, required: false
+		input "lightRepeat", "bool", title: "Enable lights to continue flashing as long as arlarm is occuring.", description: "This switch will enable lights to continue to flash long as there is a active alarm.", defaultValue: false, required: true, multiple: false
 		}		
         section("Flashing Options"){
 		input "onFor", "number", title: "On for (default 5000)", required: false
@@ -169,7 +173,7 @@ def adtLightsOpt()
         input "numFlashes", "number", title: "This number of times (default 3)", required: false
 		}
         section ("Return to ADT Tools Main page"){
-            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup"            
+            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup."            
 		}
 	}
 }
@@ -182,10 +186,10 @@ def adtCameraSetup()
         	input "recordCameras", "bool", title: "Enable Camera recording?", description: "This switch will enable cameras to record on alarm events.", defaultValue: false, required: true, multiple: false
 			input "recordRepeat", "bool", title: "Enable Camare to trigger recording as long as arlarm is occuring?", description: "This switch will enable cameras generate new clips as long as there is a active alarm.", defaultValue: false, required: true, multiple: false
 			input "cameras", "capability.videoCapture", multiple: true, required: false
-        	input name: "clipLength", type: "number", title: "Clip Length", description: "Please enter the length of each recording", required: true, range: "5..120", defaultValue: 120
+        	input name: "clipLength", type: "number", title: "Clip Length", description: "Please enter the length of each recording.", required: true, range: "5..120", defaultValue: 120
         }
         section ("Return to ADT Tools Main page"){
-            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup"            
+            href "mainPage", title: "Return to the previous menu", description: "Return to the previous menu to complete setup."            
 		}
 	}
 }
@@ -195,17 +199,18 @@ def notificationSetup()
 	dynamicPage(name: "notificationSetup", title: "Notification setup", nextPage: "mainPage")
 	{
         section("Via a push notification and/or an SMS message"){
-        input "message", "text", title: "Send this message if activity is detected", required: false
+        input "message", "text", title: "Send this message if activity is detected.", required: false
         }
-        section("Via a push notification and/or an SMS message"){
-			input("recipients", "contact", title: "Send notifications to") {
-			input "phone", "phone", title: "Enter a phone number to get SMS", required: false
-		paragraph "If outside the US please make sure to enter the proper country code"
+        section("Via a push notification and/or an SMS message?"){
+			input("recipients", "contact", title: "Send notifications to?") {
+			input "phone", "phone", title: "Enter a phone number to get SMS.", required: false
+		paragraph "If outside the US please make sure to enter the proper country code."
 			input "pushAndPhone", "enum", title: "Notify me via Push Notification", required: false, options: ["Yes", "No"]
 		}
 	}
-		section("Minimum time between messages (optional, defaults to every message)") {
-			input "frequency", "decimal", title: "Minutes", required: false
+		section("Message repeat options") {
+			input "notifyRepeat", "bool", title: "Enable this switch if you want to recieves messages until someone actively clears the alarm.", description: "Enable this switch if you want to recieves messages until someone actively clears the alarm.", defaultValue: false, required: true, multiple: false
+			input "msgrepeat", "decimal", title: "Minutes", required: false
 	}
 	}
 }
@@ -238,20 +243,20 @@ def alarmAction()
         switch (alarmtype.value)
         	{
             	case 1 :
-                	log.debug "Alarm type ${alarmtype.value} detected. Turning on siren"
+                	log.debug "Alarm type ${alarmtype.value} detected. Turning on siren."
                     alarms?.siren()
                     break
                 case 2 :
-                	log.debug "Alarm type ${alarmtype.value} detected. Turning on strobe"
+                	log.debug "Alarm type ${alarmtype.value} detected. Turning on strobe."
                     alarms?.strobe()
                     break
                 case 3 :
-                	log.debug "Alarm type ${alarmtype.value} detected. Turning on Siren and Strobe"
+                	log.debug "Alarm type ${alarmtype.value} detected. Turning on Siren and Strobe."
                     alarms?.both()
                     break
                 default:
 					log.debug "Ignoring unexpected alarmtype mode."
-        			log.debug "Alarm type ${alarmtype.value} detected"
+        			log.debug "Alarm type ${alarmtype.value} detected."
                     break
                     }
          switch (lightaction.value)
@@ -297,7 +302,7 @@ def continueFlashing()
     	log.debug "Current alarms is in ${alarmActive} state"
 		if (alarmActive != "disarmed") 
         	{
-        	log.debug "Alarm Event is still occuring. Submitting flashing for another cycle"
+        	log.debug "Alarm Event is still occuring. Submitting flashing for another cycle."
         flashLights()   
         	}
 		else {
@@ -388,11 +393,25 @@ def msg = message
 		}
 		sendNotification(msg, options)
 	}
-	if (frequency) {
-		state[evt.deviceId] = now()
+        if (settings.notifyRepeat)
+	{
+		runIn((msgrepeat * 60) , notifyRepeatChk)
 	}
 }
 }
+
+def notifyRepeatChk() {
+		def alarmActive = panel.currentSecuritySystemStatus
+    	log.debug "Current alarms is in ${alarmActive} state"
+		if (alarmActive != "disarmed") 
+        	{
+        	log.debug "Alarm Event is still occuring. Submitting another notification"
+        sendnotification()   
+        	}
+		else {
+        log.debug "Alarm has cleared and is no more notifications are needed."
+		}
+        }
 
 def cameraRecord() {	
 	log.debug "Refreshing cameras with ${clipLength} second capture"
@@ -414,7 +433,7 @@ def cameraRepeatChk() {
     	log.debug "Current alarms is in ${alarmActive} state"
 		if (alarmActive != "disarmed") 
         	{
-        	log.debug "Alarm Event is still occuring. Submitting another clip to record"
+        	log.debug "Alarm Event is still occuring. Submitting another clip to record."
         cameraRecord()   
         	}
 		else {
