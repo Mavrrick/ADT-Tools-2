@@ -29,6 +29,10 @@ definition(
 *
 * 12/25/2018 v2.0.0.a
 * Update routine to disarm Location alarm state to unschedule other location alarm events if needed.
+*
+* 1/16/2017 2.0.1
+* Add Monitor and action for alarm tamper and power event
+*
 */
 
 preferences
@@ -81,7 +85,7 @@ def mainPage()
 	{
 		section("ADT Integration Smartapps")
 		{
-			href "adtNotifier", title: "Alarm Mode Change Notifications", description: "Setup Custom notifications for alarm state change."
+			href "adtNotifier", title: "Alarm Status Notifications", description: "Setup Custom notifications for alarm system status changes."
             href "adtModeChange", title: "ADT Smartthings Alarm Mode change integration", description: "Enables various functions around Mode change integration."
 		}
 
@@ -104,7 +108,10 @@ def adtNotifier()
 	section("Set Message for each state"){
 		input "messageDisarmed", "text", title: "Send this message if alarm changes to Disarmed", required: false
         input "messageArmedAway", "text", title: "Send this message if alarm changes to Armed/Away", required: false
-        input "messageArmedStay", "text", title: "Send this message if alarm changes to Armed/Stay", required: false
+        input "messageArmedStay", "text", title: "Send this message if alarm changes to Armed/Stay", required: fals
+        input "alarmPowerState", "bool", title: "Power State Notification", description: "This switch will tell ADT Tools to notify you when the Smartthings Panel change power sources between battery and home power", defaultValue: false, required: true, multiple: false
+   		input "alarmTamperState", "bool", title: "Tamper Activity Notification", description: "This switch will tell ADT Tools to notify you if any tamper activty is detected on the Smartthings Alarm Panel", defaultValue: false, required: true, multiple: false
+
 	}
 	section("Via a push notification and/or an SMS message"){
 		input("recipients", "contact", title: "Send notifications to") {
@@ -223,6 +230,12 @@ def subscribeToEvents() {
     subscribe(myArmStay, "momentary.pushed", armstayHandler)
     subscribe(myArmAway, "momentary.pushed", armawayHandler)
     subscribe(location, "securitySystemStatus", alarmModeHandler)
+    if (settings.alarmPowerState) {       
+        subscribe(panel, "powerSource", adtPowerHandler)
+		}
+    if (settings.alarmTamperState) {       
+        subscribe(panel, "tamper", adtTamperHandler)
+		}
 }
 
 def msg = "" 
@@ -417,5 +430,150 @@ switch (evt.value)
         log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
         break
 }
-
 }
+
+def adtPowerHandler(evt) {
+       	log.debug "ADT Smartthigs Alarm Panel has changed power sources to ${evt}. "
+        
+        switch (evt.value){
+        case "mains":
+       	def msg = "The alarm has changed to run on main power"
+        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+
+	Map options = [:]	
+
+	if (location.contactBookEnabled) {
+		sendNotificationToContacts(msg, recipients, options)
+	} else {
+		if (phone) {
+			options.phone = phone
+			if (pushAndPhone != 'No') {
+				log.debug 'Sending push and SMS'
+				options.method = 'both'
+			} else {
+				log.debug 'Sending SMS'
+				options.method = 'phone'
+			}
+		} else if (pushAndPhone != 'No') {
+			log.debug 'Sending push'
+			options.method = 'push'
+		} else {
+			log.debug 'Sending nothing'
+			options.method = 'none'
+		}
+		sendNotification(msg, options)
+		}
+	if (frequency) {
+		state[evt.deviceId] = now()
+		}
+		break
+        case "battery":
+       	def msg = "The alarm has changed to run on battery power"
+        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+
+	Map options = [:]	
+
+	if (location.contactBookEnabled) {
+		sendNotificationToContacts(msg, recipients, options)
+	} else {
+		if (phone) {
+			options.phone = phone
+			if (pushAndPhone != 'No') {
+				log.debug 'Sending push and SMS'
+				options.method = 'both'
+			} else {
+				log.debug 'Sending SMS'
+				options.method = 'phone'
+			}
+		} else if (pushAndPhone != 'No') {
+			log.debug 'Sending push'
+			options.method = 'push'
+		} else {
+			log.debug 'Sending nothing'
+			options.method = 'none'
+		}
+		sendNotification(msg, options)
+		}
+	if (frequency) {
+		state[evt.deviceId] = now()
+		}
+		break
+        default:
+		log.debug "Ignoring unexpected power state ${evt.value}."
+        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+        break
+	   }
+       }
+       
+def adtTamperHandler(evt) {
+       	log.debug "ADT Smartthigs Alarm Panel has experiencend a tamper event ${evt}. "
+        
+        switch (evt.value){
+        case "detected":
+       	def msg = "The ADT Smartthings Alarm Panel has experienced a tamper event. Please check your device."
+        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+
+	Map options = [:]	
+
+	if (location.contactBookEnabled) {
+		sendNotificationToContacts(msg, recipients, options)
+	} else {
+		if (phone) {
+			options.phone = phone
+			if (pushAndPhone != 'No') {
+				log.debug 'Sending push and SMS'
+				options.method = 'both'
+			} else {
+				log.debug 'Sending SMS'
+				options.method = 'phone'
+			}
+		} else if (pushAndPhone != 'No') {
+			log.debug 'Sending push'
+			options.method = 'push'
+		} else {
+			log.debug 'Sending nothing'
+			options.method = 'none'
+		}
+		sendNotification(msg, options)
+		}
+	if (frequency) {
+		state[evt.deviceId] = now()
+		}
+		break
+        case "clear":
+       	def msg = "The tamper event on your ADT Smartthings Panel has cleared."
+        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+
+	Map options = [:]	
+
+	if (location.contactBookEnabled) {
+		sendNotificationToContacts(msg, recipients, options)
+	} else {
+		if (phone) {
+			options.phone = phone
+			if (pushAndPhone != 'No') {
+				log.debug 'Sending push and SMS'
+				options.method = 'both'
+			} else {
+				log.debug 'Sending SMS'
+				options.method = 'phone'
+			}
+		} else if (pushAndPhone != 'No') {
+			log.debug 'Sending push'
+			options.method = 'push'
+		} else {
+			log.debug 'Sending nothing'
+			options.method = 'none'
+		}
+		sendNotification(msg, options)
+		}
+	if (frequency) {
+		state[evt.deviceId] = now()
+		}
+		break
+        default:
+		log.debug "Ignoring unexpected tamper condition ${evt.value}."
+        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+        break
+	   }
+       }       
