@@ -44,6 +44,9 @@ definition(
 * Added ability to have repeat notifications from event until it is cleared on the alarm
 * Updated some text
 *
+* v1.0.1a 1/30/19
+* Updated to new notification routine that will allow multiple SMS numbers entered 
+*
 */
 import groovy.time.TimeCategory
 
@@ -205,7 +208,7 @@ def notificationSetup()
 			input("recipients", "contact", title: "Send notifications to?") {
 			input "phone", "phone", title: "Enter a phone number to get SMS.", required: false
 		paragraph "If outside the US please make sure to enter the proper country code."
-			input "pushAndPhone", "enum", title: "Notify me via Push Notification", required: false, options: ["Yes", "No"]
+			input "sendPush", "enum", title: "Notify me via Push Notification", required: false, options: ["Yes", "No"]
 		}
 	}
 		section("Message repeat options") {
@@ -369,30 +372,22 @@ def msg = message
         else {
         log.debug "Alarm Notification., '$msg'"
 /*        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'" */
-
-	Map options = [:]	
-
-	if (location.contactBookEnabled) {
-		sendNotificationToContacts(msg, recipients, options)
-	} else {
-		if (phone) {
-			options.phone = phone
-			if (pushAndPhone != 'No') {
-				log.debug 'Sending push and SMS'
-				options.method = 'both'
-			} else {
-				log.debug 'Sending SMS'
-				options.method = 'phone'
-			}
-		} else if (pushAndPhone != 'No') {
-			log.debug 'Sending push'
-			options.method = 'push'
-		} else {
-			log.debug 'Sending nothing'
-			options.method = 'none'
-		}
-		sendNotification(msg, options)
-	}
+   if (phone) { // check that the user did select a phone number
+        if ( phone.indexOf(";") > 0){
+            def phones = phone.split(";")
+            for ( def i = 0; i < phones.size(); i++) {
+                log.debug("Sending SMS ${i+1} to ${phones[i]}")
+                sendSmsMessage(phones[i], msg)
+            }
+        } else {
+            log.debug("Sending SMS to ${phone}")
+            sendSmsMessage(phone, msg)
+        }
+    } else if (settings.sendPush) {
+        log.debug("Sending Push to everyone")
+        sendPushMessage(msg)
+    }
+    sendNotificationEvent(msg)	
         if (settings.notifyRepeat)
 	{
 		runIn((msgrepeat * 60) , notifyRepeatChk)

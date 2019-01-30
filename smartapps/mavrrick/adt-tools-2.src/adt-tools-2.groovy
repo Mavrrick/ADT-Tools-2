@@ -30,8 +30,11 @@ definition(
 * 12/25/2018 v2.0.0.a
 * Update routine to disarm Location alarm state to unschedule other location alarm events if needed.
 *
-* 1/16/2017 2.0.1
+* 1/16/2019 2.0.1
 * Add Monitor and action for alarm tamper and power event
+*
+* 1/30/2019 2.0.2
+* Updated notification routine to allow for usage of multiple SMS numbers.
 *
 */
 
@@ -115,9 +118,10 @@ def adtNotifier()
 	}
 	section("Via a push notification and/or an SMS message"){
 		input("recipients", "contact", title: "Send notifications to") {
+        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
 			input "phone", "phone", title: "Enter a phone number to get SMS", required: false
-			paragraph "If outside the US please make sure to enter the proper country code"
-			input "pushAndPhone", "enum", title: "Notify me via Push Notification", required: false, options: ["Yes", "No"]
+			paragraph "If outside the US please make sure to enter the proper country code."
+			input "sendPush", "enum", title: "Send Push notifications to everyone?", required: false, options: ["Yes", "No"]
 		}
 	}
 	section("Minimum time between messages (optional, defaults to every message)") {
@@ -321,36 +325,24 @@ switch (evt.value)
         	log.debug "Message not configured. Skipping notification"
             }
         else {
-        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
-
-	Map options = [:]	
-
-	if (location.contactBookEnabled) {
-		sendNotificationToContacts(msg, recipients, options)
-	} else {
-		if (phone) {
-			options.phone = phone
-			if (pushAndPhone != 'No') {
-				log.debug 'Sending push and SMS'
-				options.method = 'both'
-			} else {
-				log.debug 'Sending SMS'
-				options.method = 'phone'
-			}
-		} else if (pushAndPhone != 'No') {
-			log.debug 'Sending push'
-			options.method = 'push'
-		} else {
-			log.debug 'Sending nothing'
-			options.method = 'none'
-		}
-		sendNotification(msg, options)
-	}
-	if (frequency) {
-		state[evt.deviceId] = now()
-	}
-}
-        break
+    if (phone) { // check that the user did select a phone number
+        if ( phone.indexOf(";") > 0){
+            def phones = phone.split(";")
+            for ( def i = 0; i < phones.size(); i++) {
+                log.debug("Sending SMS ${i+1} to ${phones[i]}")
+                sendSmsMessage(phones[i], msg)
+            }
+        } else {
+            log.debug("Sending SMS to ${phone}")
+            sendSmsMessage(phone, msg)
+        }
+    } else if (settings.sendPush) {
+        log.debug("Sending Push to everyone")
+        sendPushMessage(msg)
+    }
+    sendNotificationEvent(msg)	
+    }
+    break
     case "armedStay":
     	def msg = messageArmedStay
         if ( msg == null ) {
@@ -358,36 +350,25 @@ switch (evt.value)
             }
         else {
         log.debug "Case Armstay., '$msg'"
-        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
-
-	Map options = [:]	
-
-	if (location.contactBookEnabled) {
-		sendNotificationToContacts(msg, recipients, options)
-	} else {
-		if (phone) {
-			options.phone = phone
-			if (pushAndPhone != 'No') {
-				log.debug 'Sending push and SMS'
-				options.method = 'both'
-			} else {
-				log.debug 'Sending SMS'
-				options.method = 'phone'
-			}
-		} else if (pushAndPhone != 'No') {
-			log.debug 'Sending push'
-			options.method = 'push'
-		} else {
-			log.debug 'Sending nothing'
-			options.method = 'none'
-		}
-		sendNotification(msg, options)
-	}
-	if (frequency) {
-		state[evt.deviceId] = now()
-	}
-}
-        break
+        log.debug "$evt.name:$evt.value, sendPush:$sendPush, '$msg'"
+   if (phone) { // check that the user did select a phone number
+        if ( phone.indexOf(";") > 0){
+            def phones = phone.split(";")
+            for ( def i = 0; i < phones.size(); i++) {
+                log.debug("Sending SMS ${i+1} to ${phones[i]}")
+                sendSmsMessage(phones[i], msg)
+            }
+        } else {
+            log.debug("Sending SMS to ${phone}")
+            sendSmsMessage(phone, msg)
+        }
+    } else if (settings.sendPush) {
+        log.debug("Sending Push to everyone")
+        sendPushMessage(msg)
+    }
+    sendNotificationEvent(msg)	
+    }
+	break
     case "disarmed":
     	def msg = messageDisarmed
         if ( msg == null ) {
@@ -395,39 +376,28 @@ switch (evt.value)
             }
         else {
         log.debug "Case disarmed., '$msg'"
-        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
-
-	Map options = [:]	
-
-	if (location.contactBookEnabled) {
-		sendNotificationToContacts(msg, recipients, options)
-	} else {
-		if (phone) {
-			options.phone = phone
-			if (pushAndPhone != 'No') {
-				log.debug 'Sending push and SMS'
-				options.method = 'both'
-			} else {
-				log.debug 'Sending SMS'
-				options.method = 'phone'
-			}
-		} else if (pushAndPhone != 'No') {
-			log.debug 'Sending push'
-			options.method = 'push'
-		} else {
-			log.debug 'Sending nothing'
-			options.method = 'none'
-		}
-		sendNotification(msg, options)
-	}
-	if (frequency) {
-		state[evt.deviceId] = now()
-	}
-}
-        break
+        log.debug "$evt.name:$evt.value, sendPush:$sendPush, '$msg'"
+   if (phone) { // check that the user did select a phone number
+        if ( phone.indexOf(";") > 0){
+            def phones = phone.split(";")
+            for ( def i = 0; i < phones.size(); i++) {
+                log.debug("Sending SMS ${i+1} to ${phones[i]}")
+                sendSmsMessage(phones[i], msg)
+            }
+        } else {
+            log.debug("Sending SMS to ${phone}")
+            sendSmsMessage(phone, msg)
+        }
+    } else if (settings.sendPush) {
+        log.debug("Sending Push to everyone")
+        sendPushMessage(msg)
+    }
+    sendNotificationEvent(msg)	
+    }
+	break
     default:
 		log.debug "Ignoring unexpected ADT alarm mode."
-        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+        log.debug "$evt.name:$evt.value, sendPush:$sendPush, '$msg'"
         break
 }
 }
@@ -438,69 +408,48 @@ def adtPowerHandler(evt) {
         switch (evt.value){
         case "mains":
        	def msg = "The alarm has changed to run on main power"
-        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
-
-	Map options = [:]	
-
-	if (location.contactBookEnabled) {
-		sendNotificationToContacts(msg, recipients, options)
-	} else {
-		if (phone) {
-			options.phone = phone
-			if (pushAndPhone != 'No') {
-				log.debug 'Sending push and SMS'
-				options.method = 'both'
-			} else {
-				log.debug 'Sending SMS'
-				options.method = 'phone'
-			}
-		} else if (pushAndPhone != 'No') {
-			log.debug 'Sending push'
-			options.method = 'push'
-		} else {
-			log.debug 'Sending nothing'
-			options.method = 'none'
-		}
-		sendNotification(msg, options)
-		}
-	if (frequency) {
-		state[evt.deviceId] = now()
-		}
+        log.debug "$evt.name:$evt.value, sendPush:$sendPush, '$msg'"
+   if (phone) { // check that the user did select a phone number
+        if ( phone.indexOf(";") > 0){
+            def phones = phone.split(";")
+            for ( def i = 0; i < phones.size(); i++) {
+                log.debug("Sending SMS ${i+1} to ${phones[i]}")
+                sendSmsMessage(phones[i], msg)
+            }
+        } else {
+            log.debug("Sending SMS to ${phone}")
+            sendSmsMessage(phone, msg)
+        }
+    } else if (settings.sendPush) {
+        log.debug("Sending Push to everyone")
+        sendPushMessage(msg)
+    }
+    sendNotificationEvent(msg)	
 		break
         case "battery":
        	def msg = "The alarm has changed to run on battery power"
-        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+        log.debug "$evt.name:$evt.value, sendPush:$sendPush, '$msg'"
 
-	Map options = [:]	
-
-	if (location.contactBookEnabled) {
-		sendNotificationToContacts(msg, recipients, options)
-	} else {
-		if (phone) {
-			options.phone = phone
-			if (pushAndPhone != 'No') {
-				log.debug 'Sending push and SMS'
-				options.method = 'both'
-			} else {
-				log.debug 'Sending SMS'
-				options.method = 'phone'
-			}
-		} else if (pushAndPhone != 'No') {
-			log.debug 'Sending push'
-			options.method = 'push'
-		} else {
-			log.debug 'Sending nothing'
-			options.method = 'none'
-		}
-		sendNotification(msg, options)
-		}
-	if (frequency) {
-		state[evt.deviceId] = now()
-		}
+   if (phone) { // check that the user did select a phone number
+        if ( phone.indexOf(";") > 0){
+            def phones = phone.split(";")
+            for ( def i = 0; i < phones.size(); i++) {
+                log.debug("Sending SMS ${i+1} to ${phones[i]}")
+                sendSmsMessage(phones[i], msg)
+            }
+        } else {
+            log.debug("Sending SMS to ${phone}")
+            sendSmsMessage(phone, msg)
+        }
+    } else if (settings.sendPush) {
+        log.debug("Sending Push to everyone")
+        sendPushMessage(msg)
+    }
+    sendNotificationEvent(msg)	
 		break
         default:
 		log.debug "Ignoring unexpected power state ${evt.value}."
-        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+        log.debug "$evt.name:$evt.value, sendPush:$sendPush, '$msg'"
         break
 	   }
        }
@@ -511,69 +460,49 @@ def adtTamperHandler(evt) {
         switch (evt.value){
         case "detected":
        	def msg = "The ADT Smartthings Alarm Panel has experienced a tamper event. Please check your device."
-        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+        log.debug "$evt.name:$evt.value, sendPush:$sendPush, '$msg'"
 
-	Map options = [:]	
-
-	if (location.contactBookEnabled) {
-		sendNotificationToContacts(msg, recipients, options)
-	} else {
-		if (phone) {
-			options.phone = phone
-			if (pushAndPhone != 'No') {
-				log.debug 'Sending push and SMS'
-				options.method = 'both'
-			} else {
-				log.debug 'Sending SMS'
-				options.method = 'phone'
-			}
-		} else if (pushAndPhone != 'No') {
-			log.debug 'Sending push'
-			options.method = 'push'
-		} else {
-			log.debug 'Sending nothing'
-			options.method = 'none'
-		}
-		sendNotification(msg, options)
-		}
-	if (frequency) {
-		state[evt.deviceId] = now()
-		}
+   if (phone) { // check that the user did select a phone number
+        if ( phone.indexOf(";") > 0){
+            def phones = phone.split(";")
+            for ( def i = 0; i < phones.size(); i++) {
+                log.debug("Sending SMS ${i+1} to ${phones[i]}")
+                sendSmsMessage(phones[i], msg)
+            }
+        } else {
+            log.debug("Sending SMS to ${phone}")
+            sendSmsMessage(phone, msg)
+        }
+    } else if (settings.sendPush) {
+        log.debug("Sending Push to everyone")
+        sendPushMessage(msg)
+    }
+    sendNotificationEvent(msg)	
 		break
         case "clear":
        	def msg = "The tamper event on your ADT Smartthings Panel has cleared."
-        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+        log.debug "$evt.name:$evt.value, sendPush:$sendPush, '$msg'"
 
-	Map options = [:]	
-
-	if (location.contactBookEnabled) {
-		sendNotificationToContacts(msg, recipients, options)
-	} else {
-		if (phone) {
-			options.phone = phone
-			if (pushAndPhone != 'No') {
-				log.debug 'Sending push and SMS'
-				options.method = 'both'
-			} else {
-				log.debug 'Sending SMS'
-				options.method = 'phone'
-			}
-		} else if (pushAndPhone != 'No') {
-			log.debug 'Sending push'
-			options.method = 'push'
-		} else {
-			log.debug 'Sending nothing'
-			options.method = 'none'
-		}
-		sendNotification(msg, options)
-		}
-	if (frequency) {
-		state[evt.deviceId] = now()
-		}
+   if (phone) { // check that the user did select a phone number
+        if ( phone.indexOf(";") > 0){
+            def phones = phone.split(";")
+            for ( def i = 0; i < phones.size(); i++) {
+                log.debug("Sending SMS ${i+1} to ${phones[i]}")
+                sendSmsMessage(phones[i], msg)
+            }
+        } else {
+            log.debug("Sending SMS to ${phone}")
+            sendSmsMessage(phone, msg)
+        }
+    } else if (settings.sendPush) {
+        log.debug("Sending Push to everyone")
+        sendPushMessage(msg)
+    }
+    sendNotificationEvent(msg)	
 		break
         default:
 		log.debug "Ignoring unexpected tamper condition ${evt.value}."
-        log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
+        log.debug "$evt.name:$evt.value, sendPush:$sendPush, '$msg'"
         break
 	   }
        }       
