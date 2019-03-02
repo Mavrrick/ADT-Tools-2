@@ -45,7 +45,11 @@ definition(
 * Updated some text
 *
 * v1.0.1a 1/30/19
-* Updated to new notification routine that will allow multiple SMS numbers entered 
+* Updated to new notification routine that will allow multiple SMS numbers entered
+*
+* v1.0.1b 3/2/19
+* Added value for non dual branded sensor events to select from Location alarm state and ADT Panel Alarm state
+* Updated Trigger routine to use new switch for source of alarm state.
 *
 */
 import groovy.time.TimeCategory
@@ -126,7 +130,8 @@ def adtTrigger()
             paragraph "This event is being configured as a generic sensor event and can use any sensor. This should not be used if you want to use ADT Monitoring or only use ADT sensors. Please select the correct sensors from the types below." 
        		paragraph "What Active alarm mode do you want to monitor for 1= Arm/Stay, 2=Armed/Away. All other numberical valudes wil be ignored."
         	input "alarmtype2", "number", title: "What type of alarm do you want to trigger from?", required: false, defaultValue: 1        
-            input "contact", "capability.contactSensor", title: "Use these sensors for Unmonitored security alerts.", required: false, multiple: true
+			input "alertStsSrc", "bool", title: "Did you configur location alarm status sync for SHM?", description: "This will determine if the alert action will use location alarm state or the ADT Panel Alarm state for actions.", defaultValue: true, required: true, multiple: false
+			input "contact", "capability.contactSensor", title: "Use these sensors for Unmonitored security alerts.", required: false, multiple: true
             input "motion", "capability.motionSensor", title: "Look for activity on these motion sesors.", required: false, multiple: true
 			input "panel", "capability.securitySystem", title: "Select ADT Panel for Alarm Status.", required: true
             }
@@ -227,9 +232,9 @@ def alarmHandler(evt) {
 }
 
 def triggerHandler(evt) {
-/*        def alarmState = panel.currentSecuritySystemStatus  */
+        if (settings.alertStsSrc) {
         def alarmState = location.currentState("alarmSystemStatus")?.value
-		if (alarmState == "stay" && alarmtype2 == 1) {
+        if (alarmState == "stay" && alarmtype2 == 1) {
         log.debug "Current alarm mode: ${alarmState}."
 		alarmAction()
         }
@@ -239,6 +244,20 @@ def triggerHandler(evt) {
         }
         else
         log.debug "Current alarm mode: ${alarmState}. Ignoring event"
+        }
+        else {
+        def alarmState = panel.currentSecuritySystemStatus        
+		if (alarmState == "armedStay" && alarmtype2 == 1) {
+        log.debug "Current alarm mode: ${alarmState}."
+		alarmAction()
+        }
+        else if (alarmState == "armedAway" && alarmtype2 == 2) {
+        log.debug "Current alarm mode: ${alarmState}."
+        alarmAction()
+        }
+        else
+        log.debug "Current alarm mode: ${alarmState}. Ignoring event"
+        }
     }
     
 def alarmAction()    
