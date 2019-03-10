@@ -51,6 +51,9 @@ definition(
 * Added value for non dual branded sensor events to select from Location alarm state and ADT Panel Alarm state
 * Updated Trigger routine to use new switch for source of alarm state.
 *
+* v1.0.2 3/10/19
+* Added verbiage to explain use of multiple SMS numbers to be used for notifications
+*
 */
 import groovy.time.TimeCategory
 
@@ -210,6 +213,7 @@ def notificationSetup()
         input "message", "text", title: "Send this message if activity is detected.", required: false
         }
         section("Via a push notification and/or an SMS message?"){
+        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
 			input("recipients", "contact", title: "Send notifications to?") {
 			input "phone", "phone", title: "Enter a phone number to get SMS.", required: false
 		paragraph "If outside the US please make sure to enter the proper country code."
