@@ -41,6 +41,10 @@ definition(
 * 1/30/2019 v1.0.1
 * Updated Routine for notification to allow for Multiple SMS contacts to be entered.
 *
+* 3/10/2018 v1.0.2
+* Added the ability to use Carbon Monoxide detectors 
+* Update text around notification setup to explain use of Multiple SMS numbers for contacts
+*
 */
 import groovy.time.TimeCategory
 
@@ -76,6 +80,9 @@ def subscribeToEvents() {
 	}
 	if (smoke) {
 		subscribe(smoke, "smoke.detected", alarmAction)
+	}
+    if (monoxide) {
+		subscribe(monoxide, "carbonMonoxide.detected", alarmAction)
 	}
 }
 
@@ -114,11 +121,13 @@ def adtTrigger()
 			if (settings.alertTrgType) {
             paragraph "This event is being configured as a ADT Sensor event and should only use ADT sensors. Please select the correct sensors from the types below"       	
             input "adtsmoke", "capability.smokeDetector", title: "Look for ADT Activity on these Smoke detectors", required: false, multiple: true
-            input "adtwater", "capability.waterSensor", title: "Look for ADT Activity on these water sesors", required: false, multiple: true
-            }
+            input "adtmonoxide", "capability.carbonMonoxideDetector", title: "Look for ADT Activity on these Carbon Monoxide Detector sesors", required: false, multiple: true
+			input "adtwater", "capability.waterSensor", title: "Look for ADT Activity on these water sesors", required: false, multiple: true
+			}
             else {
             paragraph "This event is being configured as a generic sensor event and can use any sensor. This should not be used if you want to use ADT Monitoring or only use ADT sensors. Please select the correct sensors from the types below" 
             input "smoke", "capability.smokeDetector", title: "Use these sensors for Unmonitored smoke alarms", required: false, multiple: true
+            input "monoxide", "capability.carbonMonoxideDetector", title: "Use these sensors to detect Carbon Monoxide alerts", required: false, multiple: true
             input "water", "capability.waterSensor", title: "Look for water leak activity on these water sensors", required: false, multiple: true
             }
 		}
@@ -195,6 +204,7 @@ def notificationSetup()
         input "message", "text", title: "Send this message if activity is detected", required: false
         }
         section("Via a push notification and/or an SMS message"){
+        	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
 			input("recipients", "contact", title: "Send notifications to") {
 			input "phone", "phone", title: "Enter a phone number to get SMS", required: false
 		paragraph "If outside the US please make sure to enter the proper country code"
@@ -424,9 +434,36 @@ switch (evt.value)
 	log.debug "Notify got alarm event ${evt}"
     log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
         log.debug "The event id to be compared is ${evt.value}"     
-		if (adtsmoke && adtwater) {
+		if (adtsmoke && adtwater && adtmonoxide) {
+        log.debug "The event id to be compared is ${settings.adtsmoke} and ${adtwater} and ${adtmonoxide}"
+		def devices = settings.adtsmoke + settings.adtwater + settings.adtmonoxide
+        log.debug "These devices were found ${devices.id} are being reviewed."
+    	devices.findAll { it.id == evt.value } .each { 
+        log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, Home/ Life saftey event found" 
+        adtActionHandler()
+        	}
+        	}
+		else if (adtsmoke && adtwater) {
         log.debug "The event id to be compared is ${settings.adtsmoke} and ${adtwater}"
 		def devices = settings.adtsmoke + settings.adtwater
+        log.debug "These devices were found ${devices.id} are being reviewed."
+    	devices.findAll { it.id == evt.value } .each { 
+        log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, Home/ Life saftey event found" 
+        adtActionHandler()
+        	}
+        	}
+		else if (adtsmoke && adtmonoxide) {
+        log.debug "The event id to be compared is ${settings.adtsmoke} and ${adtmonoxide}"
+		def devices = settings.adtsmoke + settings.adtmonoxide
+        log.debug "These devices were found ${devices.id} are being reviewed."
+    	devices.findAll { it.id == evt.value } .each { 
+        log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, Home/ Life saftey event found" 
+        adtActionHandler()
+        	}
+        	}
+		else if (adtwater && adtmonoxide) {
+        log.debug "The event id to be compared is ${settings.adtmonoxide} and ${adtwater}"
+		def devices = settings.adtwater + settings.adtmonoxide
         log.debug "These devices were found ${devices.id} are being reviewed."
     	devices.findAll { it.id == evt.value } .each { 
         log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, Home/ Life saftey event found" 
@@ -445,6 +482,15 @@ switch (evt.value)
         else if (adtwater) {
         log.debug "The event id to be compared is ${adtwater}"
         def devices = settings.adtwater
+        log.debug "These devices were found ${devices.id} are being reviewed."
+    	devices.findAll { it.id == evt.value } .each { 
+        log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, water event found"
+        adtActionHandler()
+        	}
+            }
+        else if (adtmonoxide) {
+        log.debug "The event id to be compared is ${adtmonoxide}"
+        def devices = settings.adtmonoxide
         log.debug "These devices were found ${devices.id} are being reviewed."
     	devices.findAll { it.id == evt.value } .each { 
         log.debug "Found device: ID: ${it.id}, Label: ${it.label}, Name: ${it.name}, water event found"
