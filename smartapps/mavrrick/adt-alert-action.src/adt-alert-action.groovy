@@ -54,6 +54,9 @@ definition(
 * v1.0.2 3/10/19
 * Added verbiage to explain use of multiple SMS numbers to be used for notifications
 *
+* v1.0.2a 3/12/2019
+* Corrected bug with push notifications for new app.
+*
 */
 import groovy.time.TimeCategory
 
@@ -406,9 +409,10 @@ def msg = message
             log.debug("Sending SMS to ${phone}")
             sendSmsMessage(phone, msg)
         }
-    } else if (settings.sendPush) {
+    } 
+    if (settings.sendPush) {
         log.debug("Sending Push to everyone")
-        sendPushMessage(msg)
+        sendPush(msg)
     }
     sendNotificationEvent(msg)	
         if (settings.notifyRepeat)

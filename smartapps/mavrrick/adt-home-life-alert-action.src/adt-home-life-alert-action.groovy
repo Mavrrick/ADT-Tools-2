@@ -41,9 +41,12 @@ definition(
 * 1/30/2019 v1.0.1
 * Updated Routine for notification to allow for Multiple SMS contacts to be entered.
 *
-* 3/10/2018 v1.0.2
+* 3/10/2019 v1.0.2
 * Added the ability to use Carbon Monoxide detectors 
 * Update text around notification setup to explain use of Multiple SMS numbers for contacts
+*
+* 3/12/2019 v1.0.2a
+* Corrected bug for notifications in the new app. 
 *
 */
 import groovy.time.TimeCategory
@@ -371,9 +374,10 @@ def msg = message
             log.debug("Sending SMS to ${phone}")
             sendSmsMessage(phone, msg)
         }
-    } else if (settings.sendPush) {
+    }
+    if (settings.sendPush) {
         log.debug("Sending Push to everyone")
-        sendPushMessage(msg)
+        sendPush(msg)
     }
     sendNotificationEvent(msg)	
 	if (frequency) {

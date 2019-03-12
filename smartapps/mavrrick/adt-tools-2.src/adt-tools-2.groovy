@@ -36,6 +36,9 @@ definition(
 * 1/30/2019 2.0.2
 * Updated notification routine to allow for usage of multiple SMS numbers.
 *
+* 3/12/2019 2.0.2a
+* Corrected bug for notifications in the new app.
+*
 */
 
 preferences
@@ -336,9 +339,10 @@ switch (evt.value)
             log.debug("Sending SMS to ${phone}")
             sendSmsMessage(phone, msg)
         }
-    } else if (settings.sendPush) {
+    } 
+    if (settings.sendPush) {
         log.debug("Sending Push to everyone")
-        sendPushMessage(msg)
+        sendPush(msg)
     }
     sendNotificationEvent(msg)	
     }
@@ -362,9 +366,10 @@ switch (evt.value)
             log.debug("Sending SMS to ${phone}")
             sendSmsMessage(phone, msg)
         }
-    } else if (settings.sendPush) {
+    }
+    if (settings.sendPush) {
         log.debug("Sending Push to everyone")
-        sendPushMessage(msg)
+        sendPush(msg)
     }
     sendNotificationEvent(msg)	
     }
@@ -388,9 +393,10 @@ switch (evt.value)
             log.debug("Sending SMS to ${phone}")
             sendSmsMessage(phone, msg)
         }
-    } else if (settings.sendPush) {
+    }
+    if (settings.sendPush) {
         log.debug("Sending Push to everyone")
-        sendPushMessage(msg)
+        sendPush(msg)
     }
     sendNotificationEvent(msg)	
     }
@@ -420,9 +426,10 @@ def adtPowerHandler(evt) {
             log.debug("Sending SMS to ${phone}")
             sendSmsMessage(phone, msg)
         }
-    } else if (settings.sendPush) {
+    }
+    if (settings.sendPush) {
         log.debug("Sending Push to everyone")
-        sendPushMessage(msg)
+        sendPush(msg)
     }
     sendNotificationEvent(msg)	
 		break
@@ -441,9 +448,10 @@ def adtPowerHandler(evt) {
             log.debug("Sending SMS to ${phone}")
             sendSmsMessage(phone, msg)
         }
-    } else if (settings.sendPush) {
+    }
+    if (settings.sendPush) {
         log.debug("Sending Push to everyone")
-        sendPushMessage(msg)
+        sendPush(msg)
     }
     sendNotificationEvent(msg)	
 		break
@@ -473,9 +481,10 @@ def adtTamperHandler(evt) {
             log.debug("Sending SMS to ${phone}")
             sendSmsMessage(phone, msg)
         }
-    } else if (settings.sendPush) {
+    }
+    if (settings.sendPush) {
         log.debug("Sending Push to everyone")
-        sendPushMessage(msg)
+        sendPush(msg)
     }
     sendNotificationEvent(msg)	
 		break
@@ -494,9 +503,10 @@ def adtTamperHandler(evt) {
             log.debug("Sending SMS to ${phone}")
             sendSmsMessage(phone, msg)
         }
-    } else if (settings.sendPush) {
+    }
+    if (settings.sendPush) {
         log.debug("Sending Push to everyone")
-        sendPushMessage(msg)
+        sendPush(msg)
     }
     sendNotificationEvent(msg)	
 		break
