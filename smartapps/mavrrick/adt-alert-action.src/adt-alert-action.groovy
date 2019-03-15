@@ -220,7 +220,7 @@ def notificationSetup()
 			input("recipients", "contact", title: "Send notifications to?") {
 			input "phone", "phone", title: "Enter a phone number to get SMS.", required: false
 		paragraph "If outside the US please make sure to enter the proper country code."
-			input "sendPush", "enum", title: "Notify me via Push Notification", required: false, options: ["Yes", "No"]
+   			input "sendPush", "bool", title: "Send Push notifications to everyone?", description: "This will tell ADT Tools to send out push notifications to all users of the location", defaultValue: false, required: true, multiple: false
 		}
 	}
 		section("Message repeat options") {

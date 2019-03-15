@@ -39,6 +39,9 @@ definition(
 * 3/12/2019 2.0.2a
 * Corrected bug for notifications in the new app.
 *
+* 3/15/2019 2.0.2b
+* Changed flag for Push notifications to a different type 
+*
 */
 
 preferences
@@ -124,7 +127,8 @@ def adtNotifier()
         	paragraph "Multiple numbers can be entered as long as sperated by a (;)"
 			input "phone", "phone", title: "Enter a phone number to get SMS", required: false
 			paragraph "If outside the US please make sure to enter the proper country code."
-			input "sendPush", "enum", title: "Send Push notifications to everyone?", required: false, options: ["Yes", "No"]
+   			input "sendPush", "bool", title: "Send Push notifications to everyone?", description: "This will tell ADT Tools to send out push notifications to all users of the location", defaultValue: false, required: true, multiple: false
+//          input "sendPush", "enum", title: "Send Push notifications to everyone?", required: false, options: ["Yes", "No"]
 		}
 	}
 	section("Minimum time between messages (optional, defaults to every message)") {
