@@ -68,16 +68,16 @@ def mainPage()
 		section("Monitored panic alerts")
 		{
         	paragraph "Please enable the type of panic alerts you wat to monitor below."       	
-			input "alertEmergency", "bool", title: "Turn on monitoring for Alarm Panel Emergency Alerts", description: "Determines if using ADT dual branded sensors or generic sensors.", defaultValue: true, required: true, multiple: false
-			input "alertFire", "bool", title: "Turn on monitoring for Alarm Panel Fire Alerts", description: "Determines if using ADT dual branded sensors or generic sensors.", defaultValue: true, required: true, multiple: false
-			input "alertPanic", "bool", title: "Turn on monitoring for Alarm Panel Panic Alerts", description: "Determines if using ADT dual branded sensors or generic sensors.", defaultValue: true, required: true, multiple: false
+			input "alertEmergency", "bool", title: "Turn on monitoring for Alarm Panel Emergency Alerts", description: "Monitors alarm panel for Emergency Panic Alerts.", defaultValue: true, required: true, multiple: false
+			input "alertFire", "bool", title: "Turn on monitoring for Alarm Panel Fire Alerts", description: "Monitors alarm panel for Fire Panic Alerts.", defaultValue: true, required: true, multiple: false
+			input "alertPanic", "bool", title: "Turn on monitoring for Alarm Panel Panic Alerts", description: "Monitors alarm panel for Panic Alerts.", defaultValue: true, required: true, multiple: false
 			input "adtpanic", "capability.panicAlarm", title: "Look for ADT Activity on these Keyfobs", required: false, multiple: true
 //			href "adtTrigger", title: "Select triggers", description: "Select alert trigger devices"
 		}
 
 		section("Alert Action after alarm is triggered")
 		{
-			href "adtActions", title: "Alarm Event Actions", description: "Actions that will trigger from Home/Life Alert event. "
+			href "adtActions", title: "Alarm Event Actions", description: "Actions that will trigger from Panic Alert event. "
            	href "adtCameraSetup", title: "Camera setup for Alert Action", description: "Camera setup for Alert Action"
 		}
 		section("Messeging options")
@@ -145,12 +145,12 @@ def adtLightsOpt()
     	section("Light Activation options"){
       	input "switches3", "capability.switchLevel", title: "Adjust these lights to 100% when turned on as part of light action", multiple: true, required: false
         input "hues", "capability.colorControl", title: "Do you have any color changing bulbs that will turn on with the event", multiple:true, required: false
-		input name: "color1", type: "enum", title: "Color to user during event", options: ["Red","Blue","Yellow"], multiple:false, required: false
+		input name: "color1", type: "enum", title: "Color to use during event", options: ["Red","Blue","Yellow"], multiple:false, required: false
         input name: "colorReturn", type: "enum", title: "Color to return to after event", options: ["White","Daylight","Soft White","Warm White"], required: false
 }
 		section("Flashing Option"){
         input "hues2", "capability.colorControl", title: "Do you have any color changing bulbs that will flash with the event", multiple:true, required: false
-		input name: "colorflash", type: "enum", title: "Color to user during event", options: ["Red","Blue","Yellow"], multiple:false, required: false
+		input name: "colorflash", type: "enum", title: "Color to use during event", options: ["Red","Blue","Yellow"], multiple:false, required: false
         input name: "colorReturn2", type: "enum", title: "Color to return to after event", options: ["White","Daylight","Soft White","Warm White"], required: false
 		input "lightRepeat", "bool", title: "Enable lights to continue flashing as long as event is occuring.", description: "This switch will enable lights to continue to flash long as there is a active alarm.", defaultValue: false, required: true, multiple: false
 		input "onFor", "number", title: "On for (default 5000)", required: false
