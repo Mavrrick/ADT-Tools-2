@@ -52,10 +52,8 @@ def updated() {
 	subscribeToEvents()
 }
 
-def subscribeToEvents() {
-	if (settings.alertTrgType) {       
+def subscribeToEvents() {       
         subscribe(location, "alarm", adtAlarmHandler)
-        }
 }
 
 def mainPage()
@@ -391,7 +389,7 @@ switch (evt.value)
     log.debug "$evt.name:$evt.value, pushAndPhone:$pushAndPhone, '$msg'"
         log.debug "The event id to be compared is ${evt.value}"     
 		if (adtpanic) {
-        log.debug "The event id to be compared is ${settings.adtsmoke} and ${adtwater} and ${adtmonoxide}"
+        log.debug "The event id to be compared with ${settings.adtpanic}"
 		def devices = settings.adtpanic
         log.debug "These devices were found ${devices.id} are being reviewed."
     	devices.findAll { it.id == evt.value } .each { 
@@ -508,12 +506,13 @@ def sethuecolorflash (){
             break
          default:
          log.debug "Ignoring unexpected Color Value."
-         log.debug "Light Action ${color1.value} detected"
+         log.debug "Light Action ${colorflash.value} detected"
             break
 	}
 }
 
 def sethuecolorreturn (){
+	if (hues) {
 	switch (colorReturn.value) {
     	case "White" :
         	log.debug "Color selection ${colorReturn.value} detected. Change light color" 
@@ -536,6 +535,8 @@ def sethuecolorreturn (){
          log.debug "Light Action ${colorReturn.value} detected"
             break
 	}
+    }
+    if (hues2) {
     	switch (colorReturn2.value) {
     	case "White" :
         	log.debug "Color selection ${colorReturn2.value} detected. Change light color" 
@@ -558,4 +559,5 @@ def sethuecolorreturn (){
          log.debug "Light Action ${colorReturn2.value} detected"
             break
 	}
+    }
 }
