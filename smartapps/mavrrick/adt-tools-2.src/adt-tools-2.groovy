@@ -42,6 +42,9 @@ definition(
 * 3/15/2019 2.0.2b
 * Changed flag for Push notifications to a different type 
 *
+* 3/22/2019 2.0.3
+* Add Panic alert Child app to allow monitoring for Panic events from Keyfobs and Panel
+*
 */
 
 preferences
@@ -170,6 +173,7 @@ def adtAlertActions()
         section ("Alarm Event Action Apps"){
             app(name: "adtAlertAction", appName: "ADT Alert Action", namespace: "Mavrrick", title: "Security Alert Action apps", multiple: true)
             app(name: "adtHomeAction", appName: "ADT Home-Life Alert Action", namespace: "Mavrrick", title: "Home/Life Alert Action apps", multiple: true)
+            app(name: "adtPanicAction", appName: "ADT Panic Alert Action", namespace: "Mavrrick", title: "Panic Alert Action apps", multiple: true)
 		}
         section ("Return to ADT Tools Main page"){
             href "mainPage", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
