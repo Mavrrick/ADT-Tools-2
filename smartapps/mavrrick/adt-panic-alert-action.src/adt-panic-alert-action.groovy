@@ -33,7 +33,7 @@ definition(
 import groovy.time.TimeCategory
 
 preferences {
-	page (name: "mainPage", title: "Home/Life alert Action")
+	page (name: "mainPage", title: "Panic alert Action")
 	page (name: "adtTrigger", title: "Alert Trigger Devices")
 	page (name: "adtActions", title: "Alert Actions triggered by event")
     page (name: "adtLightsOpt", title: "Optional Light Flash Setup")
@@ -145,12 +145,12 @@ def adtLightsOpt()
       	input "switches3", "capability.switchLevel", title: "Adjust these lights to 100% when turned on as part of light action", multiple: true, required: false
         input "hues", "capability.colorControl", title: "Do you have any color changing bulbs that will turn on with the event", multiple:true, required: false
 		input name: "color1", type: "enum", title: "Color to use during event", options: ["Red","Blue","Yellow"], multiple:false, required: false
-        input name: "colorReturn", type: "enum", title: "Color to return to after event", options: ["White","Daylight","SoftWhite","WarmWhite"], required: false
+        input name: "colorReturn", type: "enum", title: "Color to return to after event", options: ["White",["Soft White":"Soft White - 2700K"],["Cool White":"Cool White - 4100K"],["Daylight":"Daylight - 5500K"]], required: false
 }
 		section("Flashing Option"){
         input "hues2", "capability.colorControl", title: "Do you have any color changing bulbs that will flash with the event", multiple:true, required: false
 		input name: "colorflash", type: "enum", title: "Color to use during event", options: ["Red","Blue","Yellow"], multiple:false, required: false
-        input name: "colorReturn2", type: "enum", title: "Color to return to after event", options: ["White","Daylight","SoftWhite","WarmWhite"], required: false
+        input name: "colorReturn2", type: "enum", title: "Color to return to after event", options: ["White",["Soft White":"Soft White - 2700K"],["Cool White":"Cool White - 4100K"],["Daylight":"Daylight - 5500K"]], required: false
 		input "lightRepeat", "bool", title: "Enable lights to continue flashing as long as event is occuring.", description: "This switch will enable lights to continue to flash long as there is a active alarm.", defaultValue: false, required: true, multiple: false
 		input "onFor", "number", title: "On for (default 5000)", required: false
 		input "offFor", "number", title: "Off for (default 5000)", required: false
@@ -470,19 +470,20 @@ def adtActionHandler() {
 			}
         }
         
+// [hue: 17, saturation: 100, level: 100]
 def sethuecoloron (){
 	switch (color1) {
     	case "Red" :
         	log.debug "Color selection ${color1.value} detected. Change light color" 
-            hues?.setColor(0,100,100)
+            hues?.setColor([hue: 0, saturation: 100, level: 100])
             break
     	case "Blue" :
         	log.debug "Color selection ${color1.value} detected. Change light color" 
-            hues?.setColor(65,100,100)
+            hues?.setColor([hue: 65, saturation: 100, level: 100])
             break
         case "Yellow" :
         	log.debug "Color selection ${color1.value} detected. Change light color" 
-            hues?.setColor(17,100,100)
+            hues?.setColor([hue: 17, saturation: 100, level: 100])
             break
          default:
          log.debug "Ignoring unexpected Color Value."
@@ -495,15 +496,15 @@ def sethuecolorflash (){
 	switch (colorflash) {
     	case "Red" :
         	log.debug "Color selection ${colorflash.value} detected. Change light color" 
-            hues2?.setColor(0,100,100)
+            hues2?.setColor([hue: 0, saturation: 100, level: 100])
             break
     	case "Blue" :
         	log.debug "Color selection ${colorflash.value} detected. Change light color" 
-            hues2?.setColor(65,100,100)
+            hues2?.setColor([hue: 65, saturation: 100, level: 100])
             break
         case "Yellow" :
         	log.debug "Color selection ${colorflash.value} detected. Change light color" 
-            hues2?.setColor(17,100,100)
+            hues2?.setColor([hue: 17, saturation: 100, level: 100])
             break
          default:
          log.debug "Ignoring unexpected Color Value."
@@ -517,19 +518,19 @@ def sethuecolorreturn (){
 	switch (colorReturn) {
     	case "White" :
         	log.debug "Color selection ${colorReturn.value} detected. Change light color" 
-            hues?.setColor(0,0,100)
-            break
-    	case "Daylight" :
+            hues?.setColor([hue: 0, saturation: 0, level: 100])
+            break       
+       	case "Soft White" :
         	log.debug "Color selection ${colorReturn.value} detected. Change light color" 
-            hues?.setColor(53,91,100)
-            break
-        case "SoftWhite" :
+            hues?.setColorTemperature(2700)
+            break    	
+        case "Cool White" :
         	log.debug "Color selection ${colorReturn.value} detected. Change light color" 
-            hues?.setColor(23,56,100)
+            hues?.setColorTemperature(4100)
             break
-        case "WarmWhite" :
+		case "Daylight" :
         	log.debug "Color selection ${colorReturn.value} detected. Change light color" 
-            hues?.setColor(20,80,100)
+            hues?.setColorTemperature(5500)
             break
          default:
          log.debug "Ignoring unexpected Color Value."
@@ -541,19 +542,19 @@ def sethuecolorreturn (){
     	switch (colorReturn2) {
     	case "White" :
         	log.debug "Color selection ${colorReturn2.value} detected. Change light color" 
-            hues2?.setColor(0,0,100)
+            hues2?.setColor([hue: 0, saturation: 0, level: 100])
             break
-    	case "Daylight" :
+    	case "Soft White" :
         	log.debug "Color selection ${colorReturn2.value} detected. Change light color" 
-            hues2?.setColor(53,91,100)
+            hues?.setColorTemperature(2700)
             break
-        case "SoftWhite" :
+        case "Cool White" :
         	log.debug "Color selection ${colorReturn2.value} detected. Change light color" 
-            hues2?.setColor(23,56,100)
+            hues?.setColorTemperature(4100)
             break
-        case "WarmWhite" :
+        case "Daylight" :
         	log.debug "Color selection ${colorReturn2.value} detected. Change light color" 
-            hues2?.setColor(20,80,100)
+            hues?.setColorTemperature(5500)
             break
          default:
          log.debug "Ignoring unexpected Color Value."
