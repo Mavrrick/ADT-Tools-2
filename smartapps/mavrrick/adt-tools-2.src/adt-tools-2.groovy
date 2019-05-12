@@ -120,7 +120,7 @@ def adtNotifier()
 	section("Set Message for each state"){
 		input "messageDisarmed", "text", title: "Send this message if alarm changes to Disarmed", required: false
         input "messageArmedAway", "text", title: "Send this message if alarm changes to Armed/Away", required: false
-        input "messageArmedStay", "text", title: "Send this message if alarm changes to Armed/Stay", required: fals
+        input "messageArmedStay", "text", title: "Send this message if alarm changes to Armed/Stay", required: false
         input "alarmPowerState", "bool", title: "Power State Notification", description: "This switch will tell ADT Tools to notify you when the Smartthings Panel change power sources between battery and home power", defaultValue: false, required: true, multiple: false
    		input "alarmTamperState", "bool", title: "Tamper Activity Notification", description: "This switch will tell ADT Tools to notify you if any tamper activty is detected on the Smartthings Alarm Panel", defaultValue: false, required: true, multiple: false
 
