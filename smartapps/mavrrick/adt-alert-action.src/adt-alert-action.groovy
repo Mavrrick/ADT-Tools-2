@@ -57,6 +57,9 @@ definition(
 * v1.0.2a 3/12/2019
 * Corrected bug with push notifications for new app.
 *
+* v1.0.3 6/1/2019
+* Added ability to set a Timeout for a external alarm if configured.
+*
 */
 import groovy.time.TimeCategory
 
@@ -157,7 +160,9 @@ def adtActions()
         	input "alarms", "capability.alarm", title: "Which Alarm(s) to trigger when ADT alarm goes off?", multiple: true, required: false
         	paragraph "Valid alarm types are 1= Siren, 2=Strobe, and 3=Both. All other numberical valudes wil be ignored."
         	input "alarmtype", "number", title: "What type of alarm do you want to trigger", required: false, range: "1..3", defaultValue: 3
-        	paragraph "Valid Light actions are are 1 = None, 2 = Turn on lights, 3 = Flash Lights and 4 = Both. All other numberical valudes wil be ignored."
+			input "alarmTimeout", "bool", title: "Enable this option if you wish for the siren to automatticall turn off after a period of time.", description: "This switch will set a time to turn off the siren after a set time.", defaultValue: false, required: true, multiple: false
+        	input "alarmTimeOValue", "number", title: "How Many minutes before the external alarm will be turned off", required: false, range: "1..15", defaultValue: 4
+			paragraph "Valid Light actions are are 1 = None, 2 = Turn on lights, 3 = Flash Lights and 4 = Both. All other numberical valudes wil be ignored."
         	input "lightaction", "number", title: "What type of light action do you want to trigger?", required: true, range: "1..4", defaultValue: 1
         	paragraph "If you choose Light action 4 do not select the same lights in both values."
         	input "switches2", "capability.switch", title: "Turn these lights on if Light action is set to 2 or 4", multiple: true, required: false
@@ -238,6 +243,11 @@ def alarmHandler(evt) {
     	alarms?.off() }
 }
 
+def alarmHandlerTO() {
+    log.debug "Alarm Timeout reached. Turing off siren."
+    	alarms?.off() 
+}
+
 def triggerHandler(evt) {
         if (settings.alertStsSrc) {
         def alarmState = location.currentState("alarmSystemStatus")?.value
@@ -274,14 +284,26 @@ def alarmAction()
             	case 1 :
                 	log.debug "Alarm type ${alarmtype.value} detected. Turning on siren."
                     alarms?.siren()
+                    	if (settings.alarmTimeout)
+							{
+							runIn((alarmTimeOValue * 60) , alarmHandlerTO)
+							}
                     break
                 case 2 :
                 	log.debug "Alarm type ${alarmtype.value} detected. Turning on strobe."
                     alarms?.strobe()
+                      	if (settings.alarmTimeout)
+							{
+							runIn((alarmTimeOValue * 60) , alarmHandlerTO)
+							}
                     break
                 case 3 :
                 	log.debug "Alarm type ${alarmtype.value} detected. Turning on Siren and Strobe."
                     alarms?.both()
+                       	if (settings.alarmTimeout)
+							{
+							runIn((alarmTimeOValue * 60) , alarmHandlerTO)
+                            }
                     break
                 default:
 					log.debug "Ignoring unexpected alarmtype mode."
@@ -524,14 +546,26 @@ def adtActionHandler() {
             	case 1 :
                 	log.debug "Alarm type ${alarmtype.value} detected. Turning on siren"
                     alarms?.siren()
+                      	if (settings.alarmTimeout)
+							{
+							runIn((alarmTimeOValue * 60) , alarmHandlerTO)
+							}
                     break
                 case 2 :
                 	log.debug "Alarm type ${alarmtype.value} detected. Turning on strobe"
                     alarms?.strobe()
+                     	if (settings.alarmTimeout)
+							{
+							runIn((alarmTimeOValue * 60) , alarmHandlerTO)
+							}
                     break
                 case 3 :
                 	log.debug "Alarm type ${alarmtype.value} detected. Turning on Siren and Strobe"
                     alarms?.both()
+                      	if (settings.alarmTimeout)
+							{
+							runIn((alarmTimeOValue * 60) , alarmHandlerTO)
+							}
                     break
                 default:
 					log.debug "Ignoring unexpected alarmtype mode."
