@@ -178,12 +178,12 @@ def adtModeAction()
         input "disarmedOff", "capability.switch", title: "What switch to turn off when disarmed?", required: false, multiple: false
 	}
    section("Select action for when alarm enters Armed/Stay"){
-   		input "armedStayOn", "capabiliy.switch", title: "What switch to turn on when armed/stay?", required: false, multiple: false
+   		input "armedStayOn", "capability.switch", title: "What switch to turn on when armed/stay?", required: false, multiple: false
 		input "armedStayOff", "capability.switch", title: "What swtich to turn off when armed/stay?", required: false, multiple: false
 	} 
    section("Select action for when alarm enters Armed/Away"){
-   		input "armedAwayOn", "capabiliy.switch", title: "What switch to turn on when armed/away?", required: false, multiple: false
-		input "armedAwayOff", "capabiliy.switch", title: "What switch to turn off when armed/away?", required: false, multiple: false
+   		input "armedAwayOn", "capability.switch", title: "What switch to turn on when armed/away?", required: false, multiple: false
+		input "armedAwayOff", "capability.switch", title: "What switch to turn off when armed/away?", required: false, multiple: false
 	} 
     section ("Return to ADT Tools Main page"){
             href "adtModeChange", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
