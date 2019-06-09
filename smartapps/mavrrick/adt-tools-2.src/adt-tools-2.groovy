@@ -52,6 +52,7 @@ preferences
 	page (name: "mainPage", title: "ADT Tools")
 	page (name: "adtNotifier", title: "ADT Custom Notification")
 	page (name: "adtModeChange", title: "Setup mode change settings")
+	page (name: "adtModeAction", title: "Setup Action on Mode Change")    
 	page (name: "adtAlertActions", title: "Work with ADT alarm alert actions")
    	page (name: "optionalSettings", title: "Optional Setup")
     page (name: "about", title: "About ADT Tools")
@@ -151,9 +152,11 @@ def adtModeChange()
         input "myDisarmButton", "capability.momentary", title: "What Button will disarm the alarm?", required: false, multiple: false
         input "myArmStay", "capability.momentary", title: "What button will put the alarm in Armed/Stay?", required: false, multiple: false
         input "myArmAway", "capability.momentary", title: "What button will put the alarm in Armed/Away?", required: false, multiple: false
-	}
+        href "adtModeAction", title: "Mode Change action", description: "Enables various functions around Mode change integration."
+	
+    }
    section("Smartthings location alarm state setup. These must be configured to use the Any Sensory Child App."){
-   		input "locAlarmSync", "bool", title: "Maintain synchronization between Smartthings ADT alarm panel and location clound alarm state", description: "This switch will tell ADT Tools if it needs to kep the ADT Alarm and the Smarthings location alarm status in sync.", defaultValue: false, required: true, multiple: false
+   		input "locAlarmSync", "bool", title: "Maintain synchronization between Smartthings ADT alarm panel and location cloud alarm state", description: "This switch will tell ADT Tools if it needs to kep the ADT Alarm and the Smarthings location alarm status in sync.", defaultValue: false, required: true, multiple: false
 		input "delay", "number", range: "1..120", title: "Please specify your Alarm Delay", required: true, defaultValue: 0
 	}
     
@@ -162,6 +165,28 @@ def adtModeChange()
 	}
     section ("Return to ADT Tools Main page"){
             href "mainPage", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
+		}
+    }
+}
+
+def adtModeAction()
+{
+	dynamicPage(name: "adtModeAction", title: "ADT Mode Action Selection", uninstall: false, install: false)
+    {
+	section("Select actions for when alarm enters Disarmed"){
+        input "disarmedOn", "capability.switch", title: "What switch to turn on when disarmed?", required: false, multiple: false
+        input "disarmedOff", "capability.switch", title: "What switch to turn off when disarmed?", required: false, multiple: false
+	}
+   section("Select action for when alarm enters Armed/Stay"){
+   		input "armedStayOn", "capabiliy.switch", title: "What switch to turn on when armed/stay?", required: false, multiple: false
+		input "armedStayOff", "capability.switch", title: "What swtich to turn off when armed/stay?", required: false, multiple: false
+	} 
+   section("Select action for when alarm enters Armed/Away"){
+   		input "armedAwayOn", "capabiliy.switch", title: "What switch to turn on when armed/away?", required: false, multiple: false
+		input "armedAwayOff", "capabiliy.switch", title: "What switch to turn off when armed/away?", required: false, multiple: false
+	} 
+    section ("Return to ADT Tools Main page"){
+            href "adtModeChange", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
 		}
     }
 }
@@ -314,6 +339,7 @@ def alarmModeHandler(evt) {
                     break
                     }
         }
+	modeAction(evt)
 }
 
 def armstaySHMHandler() {
@@ -523,4 +549,34 @@ def adtTamperHandler(evt) {
         log.debug "$evt.name:$evt.value, sendPush:$sendPush, '$msg'"
         break
 	   }
-       }       
+       }   
+       
+def modeAction(evt){
+
+	switch (evt.value) {
+    case "armedAway":
+    	if (armedAwayOn){
+        	armedAwayOn?.on()
+            }
+         if (armedAwayOff) {
+         	armedAwayOff?.off()
+            }
+    break
+    case "armedStay":
+    	 if (armedStayOn){
+        	armedStayOn?.on()
+            }
+         if (armedStayOff) {
+         	armedStayOff?.off()
+            }
+    break
+    case "disarmed":
+    	if (disarmedOn){
+        	disarmedOn?.on()
+            }
+         if (disarmedOff) {
+         	disarmedOff?.off()
+           	}
+    break
+    }
+    }
