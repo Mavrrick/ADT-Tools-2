@@ -45,6 +45,10 @@ definition(
 * 3/22/2019 2.0.3
 * Add Panic alert Child app to allow monitoring for Panic events from Keyfobs and Panel
 *
+* 6/14/2019 2.0.4
+* Corrected issue with About page displaying properlly
+* Updated menu options with ability to control switches on alarm mode change
+*
 */
 
 preferences
@@ -229,13 +233,13 @@ def about()
 		}
         section("Support locations")
 		{
-			href "thingsAreSmart", style:"embedded", title: "Things That Are Smart Support Page", url: "http://thingsthataresmart.wiki/index.php?title=ADT_tools_2"
-			href "smtReleaseThd", style:"embedded", title: "Smartthings Community Support Thread", url: "https://community.smartthings.com/t/released-adt-tools-2-for-smartthings-adt-alarm-sytsems/124951"
+			href (name: "thingsAreSmart", style:"embedded", title: "Things That Are Smart Support Page", url: "http://thingsthataresmart.wiki/index.php?title=ADT_tools_2")
+			href (name: "smtReleaseThd", style:"embedded", title: "Smartthings Community Support Thread", url: "https://community.smartthings.com/t/released-adt-tools-2-for-smartthings-adt-alarm-sytsems/124951")
 		}
         section("Support the Project")
 		{
 			paragraph "ADT Tools is provided free for personal and non-commercial use.  I have worked on this app in my free time to fill the needs I have found for myself and others like you.  I will continue to make improvements where I can. If you would like you can donate to continue to help with development please use the link below."
-			href "donate", style:"embedded", title: "Consider making a \$5 or \$10 donation today.", image: "https://storage.googleapis.com/arlopilot/donate-icon.png", url: "https://www.paypal.me/mavrrick58"
+			href (name: "donate", style:"embedded", title: "Consider making a \$5 or \$10 donation today.", image: "https://lh4.googleusercontent.com/-1dmLp--W0OE/AAAAAAAAAAI/AAAAAAAAEYU/BRuIXPPiOmI/s0-c-k-no-ns/photo.jpg", url: "https://www.paypal.me/mavrrick58")
 		}
         section ("Return to ADT Tools Main page"){
             href "mainPage", title: "ADT Tools Main Menu", description: "Return to main ADT Tools Main Menu"            
