@@ -48,8 +48,29 @@ definition(
 * 3/12/2019 v1.0.2a
 * Corrected bug for notifications in the new app. 
 *
+* 1/20/2020 v1.0.3 
+* Added Pushover messaging integration to app
+*
 */
 import groovy.time.TimeCategory
+
+//PushOver-Manager Input Generation Functions
+private getPushoverSounds(){return (Map) atomicState?.pushoverManager?.sounds?:[:]}
+private getPushoverDevices(){List opts=[];Map pmd=atomicState?.pushoverManager?:[:];pmd?.apps?.each{k,v->if(v&&v?.devices&&v?.appId){Map dm=[:];v?.devices?.sort{}?.each{i->dm["${i}_${v?.appId}"]=i};addInputGrp(opts,v?.appName,dm);}};return opts;}
+private inputOptGrp(List groups,String title){def group=[values:[],order:groups?.size()];group?.title=title?:"";groups<<group;return groups;}
+private addInputValues(List groups,String key,String value){def lg=groups[-1];lg["values"]<<[key:key,value:value,order:lg["values"]?.size()];return groups;}
+private listToMap(List original){original.inject([:]){r,v->r[v]=v;return r;}}
+private addInputGrp(List groups,String title,values){if(values instanceof List){values=listToMap(values)};values.inject(inputOptGrp(groups,title)){r,k,v->return addInputValues(r,k,v)};return groups;}
+private addInputGrp(values){addInputGrp([],null,values)}
+//PushOver-Manager Location Event Subscription Events, Polling, and Handlers
+public pushover_init(){subscribe(location,"pushoverManager",pushover_handler);pushover_poll()}
+public pushover_cleanup(){state?.remove("pushoverManager");unsubscribe("pushoverManager");}
+public pushover_poll(){sendLocationEvent(name:"pushoverManagerCmd",value:"poll",data:[empty:true],isStateChange:true,descriptionText:"Sending Poll Event to Pushover-Manager")}
+public pushover_msg(List devs,Map data){if(devs&&data){sendLocationEvent(name:"pushoverManagerMsg",value:"sendMsg",data:data,isStateChange:true,descriptionText:"Sending Message to Pushover Devices: ${devs}");}}
+public pushover_handler(evt){Map pmd=atomicState?.pushoverManager?:[:];switch(evt?.value){case"refresh":def ed = evt?.jsonData;String id = ed?.appId;Map pA = pmd?.apps?.size() ? pmd?.apps : [:];if(id){pA[id]=pA?."${id}"instanceof Map?pA[id]:[:];pA[id]?.devices=ed?.devices?:[];pA[id]?.appName=ed?.appName;pA[id]?.appId=id;pmd?.apps = pA;};pmd?.sounds=ed?.sounds;break;case "reset":pmd=[:];break;};atomicState?.pushoverManager=pmd;}
+//Builds Map Message object to send to Pushover Manager
+private buildPushMessage(List devices,Map msgData,timeStamp=false){if(!devices||!msgData){return};Map data=[:];data?.appId=app?.getId();data.devices=devices;data?.msgData=msgData;if(timeStamp){data?.msgData?.timeStamp=new Date().getTime()};pushover_msg(devices,data);}
+
 
 preferences {
 	page (name: "mainPage", title: "Home/Life alert Action")
@@ -63,12 +84,19 @@ preferences {
 def installed() {
 	log.debug "Installed with settings: ${settings}"
 	subscribeToEvents()
+    state?.isInstalled = true
+    initialize()
 }
 
 def updated() {
 	log.debug "Updated with settings: ${settings}"
 	unsubscribe()
 	subscribeToEvents()
+    initialize()
+}
+
+def initialize() {
+    pushover_init()
 }
 
 def subscribeToEvents() {
@@ -214,6 +242,23 @@ def notificationSetup()
    			input "sendPush", "bool", title: "Send Push notifications to everyone?", description: "This will tell ADT Tools to send out push notifications to all users of the location", defaultValue: false, required: true, multiple: false
 		}
 	}
+        section("Enable Pushover Support:") {
+    input ("pushoverEnabled", "bool", title: "Use Pushover Integration", required: false, submitOnChange: true)
+    if(settings?.pushoverEnabled == true) {
+        if(state?.isInstalled) {
+            if(!atomicState?.pushoverManager) {
+                paragraph "If this is the first time enabling Pushover than leave this page and come back if the devices list is empty"
+                pushover_init()
+            } else {
+                input "pushoverDevices", "enum", title: "Select Pushover Devices", description: "Tap to select", groupedOptions: getPushoverDevices(), multiple: true, required: false, submitOnChange: true
+                if(settings?.pushoverDevices) {
+                    input "pushoverSound", "enum", title: "Notification Sound (Optional)", description: "Tap to select", defaultValue: "pushover", required: false, multiple: false, submitOnChange: true, options: getPushoverSounds()
+                }
+            }
+        } else { paragraph "New Install Detected!!!\n\n1. Press Done to Finish the Install.\n2. Goto the Automations Tab at the Bottom\n3. Tap on the SmartApps Tab above\n4. Select ${app?.getLabel()} and Resume configuration", state: "complete" }
+    }
+}
+
 		section("Minimum time between messages (optional, defaults to every message)") {
 			input "frequency", "decimal", title: "Minutes", required: false
 	}
@@ -292,7 +337,10 @@ def alarmAction(evt)
 					log.debug "Ignoring unexpected Light Action type."
         			log.debug "Light Action ${lightaction.value} detected"
                     break
-			} 		
+			} 
+   	if(settings?.pushoverEnabled == true) {
+    		sendPushoverMessage()
+		}
 	sendnotification()
 	if (settings.recordCameras)
 	{
@@ -554,9 +602,32 @@ def adtActionHandler() {
         			log.debug "Light Action ${lightaction.value} detected"
                     break
 			}
+       	if(settings?.pushoverEnabled == true) {
+    		sendPushoverMessage()
+		}
         sendnotification()
 		if (settings.recordCameras)
 			{
 		cameraRecord()
 			}
         }
+        
+def sendPushoverMessage() {
+    Map msgObj = [
+        title: app?.getLabel(), //Optional and can be what ever
+        html: false, //Optional see: https://pushover.net/api#html
+        message: settings?.message, //Required (HTML markup requires html: true, parameter)
+        priority: 0,  //Optional
+        retry: 30, //Requried only when sending with High-Priority
+        expire: 10800, //Requried only when sending with High-Priority
+        sound: settings?.pushoverSound, //Optional
+//        url: "https://www.foreverbride.com/files/6414/7527/3346/test.png", //Optional
+//        url_title: "ADT Tools Home-Life Alert Action" //Optional
+    ]
+    /* buildPushMessage(List param1, Map param2, Boolean param3)
+        Param1: List of pushover Device Names
+        Param2: Map msgObj above
+        Param3: Boolean add timeStamp
+    */
+    buildPushMessage(settings?.pushoverDevices, msgObj, true) // This method is part of the required code block
+}
