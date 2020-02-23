@@ -52,6 +52,9 @@ definition(
 * 01/22/2020 2.0.5
 * Added ability to use PushOver notification 
 *
+* 02/23/2020 2.06
+* Added flagging for Virtual button creation. This should prevent issues if you don't turn off the flag to create the virtual buttons.
+*
 */
 
 preferences
@@ -92,6 +95,10 @@ def initialize() {
         log.debug "child app: ${child.label}"
     }
     if (settings.createVirtButton) {
+    	if (state.crtVrtButton) {
+        log.debug "Virtual buttons already created, Will not create buttons"
+        }
+        else {
     				log.debug "initialize: Creating virtual button devices ADT Mode Change"
 				addChildDevice("Mavrrick", "ADT Tools Button", "ADT Tools Disarmed", location.hubs[0].id, [
 					"name": "ADT Tools Disarmed",
@@ -108,9 +115,11 @@ def initialize() {
 					"label": "ADT Tools Armed Away",
 					"completedSetup": true, 					
 				])
+                state?.crtVrtButton = true
                 log.debug "ADT Tools Alarm Buttons created"
                 }
-	}
+		}
+    }
 
 
 /*
@@ -290,6 +299,7 @@ def installed() {
 	log.debug "Installed with settings: ${settings}"
 	subscribeToEvents()
     state?.isInstalled = true
+    state.crtVrtButton = false
     initialize()
 }
 
