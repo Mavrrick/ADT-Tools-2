@@ -122,7 +122,14 @@ def initialize() {
                 log.debug "ADT Tools Alarm Buttons created"
                 }
 		}
+      	else {
+        state?.crtVrtButton = false
+//    	deleteChildDevice("ADT Tools Disarmed")
+//        deleteChildDevice("ADT Tools Armed Stay")
+//        deleteChildDevice("ADT Tools Armed Away")
+		}
     }
+    
 
 
 /*
