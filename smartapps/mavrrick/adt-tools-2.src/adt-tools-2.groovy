@@ -55,6 +55,9 @@ definition(
 * 02/23/2020 2.06
 * Added flagging for Virtual button creation. This should prevent issues if you don't turn off the flag to create the virtual buttons.
 *
+* 08/22/2020 2.06a
+* Updated Mode change command to use true value instead of commmand value.
+*
 */
 
 preferences
@@ -346,7 +349,7 @@ def armstayHandler(evt) {
         	log.debug "Current alarm mode: ${alarmState}. Alarm must be in Disarmed state before changeing state"
         }
         else {       
-        panel?.armStay(armedStay)
+        panel?.armStay(true)
 
         }
 	}
@@ -358,7 +361,7 @@ def armawayHandler(evt) {
         	log.debug "Current alarm mode: ${alarmState}. Alarm must be in Disarmed state before changeing state"
         }
         else {
-      	panel?.armAway(armedAway)}
+      	panel?.armAway(true)}
 	   }
 
 def alarmModeHandler(evt) {
