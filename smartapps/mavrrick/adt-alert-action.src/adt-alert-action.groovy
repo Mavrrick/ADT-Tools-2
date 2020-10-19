@@ -63,6 +63,8 @@ definition(
 * v1.0.4 1/20/20
 * Added Pushover messaging integration to app
 *
+* v1.0.5 10/19/20
+* Added Exit Delay for when using non dual branded sensors.
 */
 import groovy.time.TimeCategory
 
@@ -108,6 +110,7 @@ def updated() {
 
 def initialize() {
     pushover_init()
+    state.noteTime = now()
 }
 
 def subscribeToEvents() {
@@ -167,6 +170,7 @@ def adtTrigger()
        		paragraph "What Active alarm mode do you want to monitor for 1= Arm/Stay, 2=Armed/Away. All other numberical valudes wil be ignored."
         	input "alarmtype2", "number", title: "What type of alarm do you want to trigger from?", required: false, defaultValue: 1        
 			input "alertStsSrc", "bool", title: "Did you configur location alarm status sync for SHM?", description: "This will determine if the alert action will use location alarm state or the ADT Panel Alarm state for actions.", defaultValue: true, required: true, multiple: false
+            input "exitDelay", "number", title: "Please specify your Exit delay in seconds between 30 and 120", required: false, range: "30..120", defaultValue: 30 
 			input "contact", "capability.contactSensor", title: "Use these sensors for Unmonitored security alerts.", required: false, multiple: true
             input "motion", "capability.motionSensor", title: "Look for activity on these motion sesors.", required: false, multiple: true
 			input "panel", "capability.securitySystem", title: "Select ADT Panel for Alarm Status.", required: true
@@ -283,7 +287,11 @@ def devices = " "
 def alarmHandler(evt) {
 	if (evt.value == 'disarmed') {
     log.debug "Alarm switch to disarmed. Turing off siren."
-    	alarms?.off() }
+    	alarms?.off() 
+        state.noteTime = now()
+        }
+    else 
+    state.noteTime = now()
 }
 
 def alarmHandlerTO() {
@@ -308,16 +316,34 @@ def triggerHandler(evt) {
         else {
         def alarmState = panel.currentSecuritySystemStatus        
 		if (alarmState == "armedStay" && alarmtype2 == 1) {
-        log.debug "Current alarm mode: ${alarmState}."
-		alarmAction()
-        }
+        	log.debug "Current alarm mode: ${alarmState}."
+            log.debug "Checking Exit Delay interval"
+        	def timePassed = now() - state.noteTime
+            log.debug "${new Date(state.noteTime)}"
+            log.debug "${timePassed}"
+            if (timePassed > exitDelay*1000){
+				alarmAction()
+        		}
+            else {
+            log.debug "Exit Delay validation did not pass. Ignoring alert until time has passed."
+        		}
+        	}
         else if (alarmState == "armedAway" && alarmtype2 == 2) {
-        log.debug "Current alarm mode: ${alarmState}."
-        alarmAction()
-        }
+        	log.debug "Current alarm mode: ${alarmState}."
+            log.debug "Checking Exit Delay interval"
+        	def timePassed = now() - state.noteTime
+            log.debug "${new Date(state.noteTime)}"
+            log.debug "${timePassed}"
+            if (timePassed > exitDelay*1000){
+				alarmAction()
+        		}
+            else {
+            log.debug "Exit Delay validation did not pass. Ignoring alert until time has passed."
+        		}
+        	}
         else
         log.debug "Current alarm mode: ${alarmState}. Ignoring event"
-        }
+        	}
     }
     
 def alarmAction()    
